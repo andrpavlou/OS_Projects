@@ -29,6 +29,7 @@ struct shared_actions{
 };
 
 
+
 int main(){
 
     struct shared_actions actions0;
