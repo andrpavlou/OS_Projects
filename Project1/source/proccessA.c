@@ -1,4 +1,5 @@
 #define TEXT_SZ 2048
+#define EXIT_PROGRAM "#BYE#"
 
 
 #include <unistd.h>
@@ -10,11 +11,17 @@
 struct shared_actions{
     char write[TEXT_SZ];
     char read[TEXT_SZ];
+    char exit[5];
 };
+
 
 int main(){
 
-    struct shared_actions* actions;
+    struct shared_actions actions0;
+    struct shared_actions* actions ;
+    actions = &actions0;
+    strcpy(actions->exit, EXIT_PROGRAM);
+
     char buffer[BUFSIZ];
 
     key_t key; 
@@ -36,6 +43,10 @@ int main(){
         fprintf(stderr, "Shmat Failed\n");
         exit(EXIT_FAILURE);
     }
+    printf("Shared memory segment with id %d attached at %p\n", shmid, shared_memory);
+
+
+
 
 
 
