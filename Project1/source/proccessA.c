@@ -24,18 +24,13 @@ struct shared_actions{
     char write[TEXT_SZ];
     char read[TEXT_SZ];
     char exit[5];
-<<<<<<< HEAD
     sem_t sem1;
     sem_t sem2;
 };
 
 
 
-=======
-};
 
-
->>>>>>> e35e674b80722bd10f7736f257e96323393ad2b1
 int main(){
 
     struct shared_actions actions0;
