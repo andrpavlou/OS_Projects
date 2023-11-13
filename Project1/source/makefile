@@ -4,4 +4,4 @@ procA:
 
 run:
 	./processA
-	rm proccessA
+	rm processA

@@ -13,6 +13,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
+#include <pthread.h>
+
 
 
 
@@ -29,20 +31,20 @@ struct shared_actions{
 
 
 
+void* input(void* data);
+
+
 int main(){
 
-    struct shared_actions actions0;
-    struct shared_actions* actions ;
-    actions = &actions0;
+    char* buffer = malloc(sizeof(BUFSIZ));
+    // struct shared_actions actions0;
+    struct shared_actions* actions = malloc(sizeof(struct shared_actions));
+    // actions = &actions0;
+
     strcpy(actions->exit, EXIT_PROGRAM);
 
-    char buffer[BUFSIZ];
-
+    //key??
     key_t key; 
-    // if(key = ftok("proccessA", 'A') == - 1){    
-    //     fprintf(stderr, "Key Creation Failed\n");
-    //     exit(EXIT_FAILURE);
-    // }
 
     int shmid;
     shmid = shmget((key_t)12345, sizeof(struct shared_actions), 0666 | IPC_CREAT);
@@ -68,22 +70,52 @@ int main(){
     sem_init(&actions->sem1, 1, INITIAL_VALUE);
     sem_init(&actions->sem2, 1, INITIAL_VALUE);
     
-    
+
+
+    pthread_t th_input;
+    int it = 0;
     while(running){
-        printf("BLOCKED A: \n");        
-
-        sem_wait(&actions->sem1);
-
-        printf("UNBLOCKED A: \n");
-        running = 0;
+    pthread_create(&th_input, NULL, input, (void*)buffer);
+    pthread_join(th_input, NULL);
+    strncpy(actions->read, buffer, 15);
+    
+    printf(" %s ", actions->read);
+    it++;
+    if(it == 5)
+        break;
     }
 
+    // while(running){
+    //     printf("BLOCKED A: \n");        
+    //     // sem_wait(&actions->sem1);
+    //     //Randevou point.
+    //     printf("GIVE A TEXT: ");
+
+    //     printf("EXITING A: \n");
+    //     running = 0;
+    // }
+
+
     //TODO: create thread to exit
+    //destroy sems
     if (shmdt(shared_memory) == -1) {
 		fprintf(stderr, "shmdt failed\n");
 		exit(EXIT_FAILURE);
 	}
+	if (shmctl(shmid, IPC_RMID, 0) == -1) {
+		fprintf(stderr, "shmctl(IPC_RMID) failed\n");
+		exit(EXIT_FAILURE);
+	}
+
+}
+void* input(void* data){
+    char* inp = malloc(sizeof(BUFSIZ));
+    inp = (char*)data;
+    // struct shared_actions* share = malloc(sizeof(struct shared_actions));
+    // share = (struct shared_actions*) data;
+
+    printf("FROM THREAD\n");
+	fgets(inp, BUFSIZ, stdin);
 
 
-return 0;
 }

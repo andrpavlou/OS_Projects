@@ -31,9 +31,7 @@ struct shared_actions{
 
 int main(){
 
-    struct shared_actions actions0;
-    struct shared_actions* actions ;
-    actions = &actions0;
+    struct shared_actions* actions = malloc(sizeof(struct shared_actions));
     strcpy(actions->exit, EXIT_PROGRAM);
 
     char buffer[BUFSIZ];
