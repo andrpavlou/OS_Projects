@@ -87,6 +87,3 @@ int main(){
 
 return 0;
 }
-
-//see shm_open(3), mmap(2), and shmget
-//https://stackoverflow.com/questions/21311080/linux-shared-memory-shmget-vs-mmap
