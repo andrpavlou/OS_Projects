@@ -1,7 +1,7 @@
 procA:
-	gcc -pthread -o proccessA proccessA.c
-	gcc -pthread -o proccessB proccessB.c
+	gcc -pthread -o processA processA.c
+	gcc -pthread -o processB processB.c
 
 run:
-	./proccessA
+	./processA
 	rm proccessA

@@ -14,28 +14,21 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 
-#define SEM_NAME1 "/semA"
-#define SEM_NAME2 "/semB"
+
 
 #define SEM_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
 #define INITIAL_VALUE 0
 
 struct shared_actions{
+
     char write[TEXT_SZ];
     char read[TEXT_SZ];
     char exit[5];
-<<<<<<< HEAD
     sem_t sem1;
     sem_t sem2;
 };
 
 
-
-=======
-};
-
-
->>>>>>> e35e674b80722bd10f7736f257e96323393ad2b1
 int main(){
 
     struct shared_actions actions0;
@@ -45,8 +38,8 @@ int main(){
 
     char buffer[BUFSIZ];
 
-    key_t key; 
-    // if(key = ftok("proccessA", 'A') == - 1){    
+    key_t key = 12345; 
+    // if(key = ftok("proccessB", 'B') == - 1){    
     //     fprintf(stderr, "Key Creation Failed\n");
     //     exit(EXIT_FAILURE);
     // }
@@ -65,42 +58,29 @@ int main(){
         exit(EXIT_FAILURE);
     }
     printf("Shared memory segment with id %d attached at %p\n", shmid, shared_memory);
-<<<<<<< HEAD
+
     int running = 1;
-=======
-
-
-
->>>>>>> e35e674b80722bd10f7736f257e96323393ad2b1
-
-    //1 is to be shared across other proccesses
-    //TODO: elegox gia fail
-    sem_init(&actions->sem1, 0, INITIAL_VALUE);
-    sem_init(&actions->sem2, 0, INITIAL_VALUE);
-
-    // int value;
-    // sem_getvalue(&actions->sem1, &value);
-    // printf(" %d  \n", value);
-    
     actions = (struct shared_actions *)shared_memory;
-    
-    while(running){
-        printf("BLOCKED A: \n");        
-        sem_wait(&actions->sem1);
 
-        printf("UNBLOCKED A: \n");
+    while(running){
+        printf("B IS TRYING TO UNBLOCK A \n");
+
+        sem_post(&actions->sem1);
+
+        printf("PROCB IS EXITING....\n");
         running = 0;
     }
 
+
+    //TODO: create thread to exit
     if (shmdt(shared_memory) == -1) {
 		fprintf(stderr, "shmdt failed\n");
 		exit(EXIT_FAILURE);
 	}
-
-
-
+	if (shmctl(shmid, IPC_RMID, 0) == -1) {
+		fprintf(stderr, "shmctl(IPC_RMID) failed\n");
+		exit(EXIT_FAILURE);
+	}
 
 return 0;
 }
-
-//see shm_open(3), mmap(2), and shmget
