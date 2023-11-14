@@ -11,6 +11,7 @@
 #include <semaphore.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <pthread.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
 
@@ -26,8 +27,9 @@ struct shared_actions{
     char exit[5];
     sem_t sem1;
     sem_t sem2;
+    int readi;
 };
-
+void* input(void* data);
 
 int main(){
 
@@ -60,14 +62,27 @@ int main(){
     int running = 1;
     actions = (struct shared_actions *)shared_memory;
 
+
+    // pthread_t th_input;
+    // actions->readi = 1;
+    
+    // pthread_join(th_input, NULL);
+
+    
     while(running){
         printf("B IS TRYING TO UNBLOCK A \n");
 
         sem_post(&actions->sem1);
+        // while(actions->readi){
+        //     pthread_create(&th_input, NULL, input, (void*)actions);
+        //     pthread_join(th_input, NULL);
+        // }
+        // printf("%d ", actions->readi);
 
         printf("PROCB IS EXITING....\n");
         running = 0;
     }
+    
 
 
     //TODO: create thread to exit
@@ -79,6 +94,19 @@ int main(){
 		fprintf(stderr, "shmctl(IPC_RMID) failed\n");
 		exit(EXIT_FAILURE);
 	}
+}
 
-return 0;
+void* input(void* data){
+    // char* inp = malloc(sizeof(BUFSIZ));
+    // inp = (char*)data;
+    struct shared_actions* share = malloc(sizeof(struct shared_actions));
+    share = (struct shared_actions*) data;
+    
+
+    printf("FROM THREAD\n");
+
+    while(share->readi){
+	    fgets((char*)share->read, BUFSIZ, stdin);
+        share->readi = 0;
+    }
 }

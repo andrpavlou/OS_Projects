@@ -22,6 +22,7 @@
 #define INITIAL_VALUE 0
 
 struct shared_actions{
+    int readi;
     char write[TEXT_SZ];
     char read[TEXT_SZ];
     char exit[5];
@@ -72,28 +73,34 @@ int main(){
     
 
 
-    pthread_t th_input;
-    int it = 0;
+    // pthread_t th_input;
+    // int it = 0;
+
+
+    // actions->readi = 1;
+
+    // pthread_cancel(th_input);
+
+    ////////////////////////////////
+
+
     while(running){
-    pthread_create(&th_input, NULL, input, (void*)buffer);
-    pthread_join(th_input, NULL);
-    strncpy(actions->read, buffer, 15);
-    
-    printf(" %s ", actions->read);
-    it++;
-    if(it == 5)
-        break;
+        printf("BLOCKED A: \n");        
+        // sem_wait(&actions->sem1);
+        int value;
+        sem_getvalue(&actions->sem1, &value);
+        printf("%d\n",value);
+
+        // while(actions->readi){
+        //     pthread_create(&th_input, NULL, input, (void*)actions);
+        //     pthread_join(th_input, NULL);
+        // }
+
+        //Randevou point.
+
+        printf("EXITING A: \n");
+        running = 1;
     }
-
-    // while(running){
-    //     printf("BLOCKED A: \n");        
-    //     // sem_wait(&actions->sem1);
-    //     //Randevou point.
-    //     printf("GIVE A TEXT: ");
-
-    //     printf("EXITING A: \n");
-    //     running = 0;
-    // }
 
 
     //TODO: create thread to exit
@@ -106,16 +113,20 @@ int main(){
 		fprintf(stderr, "shmctl(IPC_RMID) failed\n");
 		exit(EXIT_FAILURE);
 	}
-
 }
+
+
 void* input(void* data){
-    char* inp = malloc(sizeof(BUFSIZ));
-    inp = (char*)data;
-    // struct shared_actions* share = malloc(sizeof(struct shared_actions));
-    // share = (struct shared_actions*) data;
+    // char* inp = malloc(sizeof(BUFSIZ));
+    // inp = (char*)data;
+    struct shared_actions* share = malloc(sizeof(struct shared_actions));
+    share = (struct shared_actions*) data;
+    
 
     printf("FROM THREAD\n");
-	fgets(inp, BUFSIZ, stdin);
 
-
+    while(share->readi){
+	    fgets((char*)share->read, BUFSIZ, stdin);
+        share->readi = 0;
+    }
 }
