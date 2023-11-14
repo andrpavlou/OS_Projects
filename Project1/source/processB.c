@@ -16,7 +16,7 @@
 #include <pthread.h>
 
 
-
+void* input(void* data);
 
 #define SEM_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
 #define INITIAL_VALUE 0
@@ -60,16 +60,22 @@ int main(){
 
     int running = 1;
     actions = (struct shared_actions *)shared_memory;
+    pthread_t th_input;
+    int *th_ret;
 
     while(running){
         printf("B IS TRYING TO UNBLOCK A \n");
 
         sem_post(&actions->sem1);
-        // if(actions->readA)
+        pthread_create(&th_input, NULL, input, (void*)actions);
 
-        while(!actions->readA){
-            printf("waiting for input");
-        }
+        while(!actions->readB && !actions->readA);
+
+        if(actions->readA)
+            pthread_cancel(th_input);
+
+        pthread_join(th_input, (void**)&th_ret);
+
 
         printf("PROCB IS EXITING....\n");
         running = 0;
@@ -85,20 +91,26 @@ int main(){
 		fprintf(stderr, "shmctl(IPC_RMID) failed\n");
 		exit(EXIT_FAILURE);
 	}
-// return 0;
+
 }
 
-// void* input(void* data){
-//     // char* inp = malloc(sizeof(BUFSIZ));
-//     // inp = (char*)data;
-//     struct shared_actions* share = malloc(sizeof(struct shared_actions));
-//     share = (struct shared_actions*) data;
+void* input(void* data){
+    // char* inp = malloc(sizeof(BUFSIZ));
+    // inp = (char*)data;
+
+    struct shared_actions* share = malloc(sizeof(struct shared_actions));
+    share = (struct shared_actions*) data;
     
 
-//     printf("FROM THREAD\n");
+    printf("FROM THREAD\n");
 
-//     while(share->readi){
-// 	    fgets((char*)share->read, BUFSIZ, stdin);
-//         share->readi = 0;
-//     }
-// }
+
+	fgets((char*)share->read, BUFSIZ, stdin);
+    share->readB = 1;
+    
+    int* outp = malloc(sizeof(int));
+    int num = 1;
+    *outp = num;
+    
+    return (void*) outp;    
+}

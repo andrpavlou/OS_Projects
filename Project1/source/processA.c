@@ -23,7 +23,7 @@ void* input(void* data);
 #define INITIAL_VALUE 0
 struct shared_actions{
     int readA;
-    int ReadB;
+    int readB;
     char write[TEXT_SZ];
     char read[TEXT_SZ];
     char exit[5];
@@ -64,17 +64,12 @@ int main(){
     }
     printf("Shared memory segment with id %d attached at %p\n", shmid, shared_memory);
 
-    int running = 1;
-
-
-    actions = (struct shared_actions *)shared_memory;
-
-    //1 is to be shared across other proccesses
-    //TODO: elegox gia fail
-    
+    actions = (struct shared_actions *)shared_memory;    
     actions->readA = 0;
 
 
+    //1 is to be shared across other proccesses
+    //TODO: elegox gia fail
     sem_init(&actions->sem1, 1, INITIAL_VALUE);
     sem_init(&actions->sem2, 1, INITIAL_VALUE);
 
@@ -82,34 +77,21 @@ int main(){
 
     //free at the end
     int *th_ret;
+    int running = 1;
     while(running){
         printf("BLOCKED A: \n");        
 
         sem_wait(&actions->sem1);
         pthread_create(&th_input, NULL, input, (void*)actions);
-
         // if(actions->ReadB)
-        //     pthread_cancel(th_input);
+        //     pthread_cancel(th_input); 
+        
+        while(!actions->readB && !actions->readA);
+        
+        if(actions->readB)
+            pthread_cancel(th_input);
 
-        while(1){
-            pthread_join(th_input, (void**)&th_ret);
-            if(*(int*)th_ret == 1){
-                actions->readA = 1;
-                break;
-            }
-                
-        }
-
-
-
-            // if(outp == 1){
-            //     actions->readA = 1;
-            //     break;
-            // }
-        // }
-
-        // printf("return of thread: %ld ", (int*)th_ret);
-
+        pthread_join(th_input, (void**)&th_ret);
 
         printf("UNBLOCKED A: \n");
         running = 0;
@@ -120,9 +102,6 @@ int main(){
 		fprintf(stderr, "shmdt failed\n");
 		exit(EXIT_FAILURE);
 	}
-
-
-// return 0;
 }
 
 
@@ -139,7 +118,7 @@ void* input(void* data){
 
 
 	fgets((char*)share->read, BUFSIZ, stdin);
-
+    share->readA = 1;
     
     int* outp = malloc(sizeof(int));
     int num = 1;
