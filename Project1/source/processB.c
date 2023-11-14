@@ -11,9 +11,10 @@
 #include <semaphore.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <pthread.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
+#include <pthread.h>
+
 
 
 
@@ -21,36 +22,33 @@
 #define INITIAL_VALUE 0
 
 struct shared_actions{
-
+    int readA;
+    int readB;
     char write[TEXT_SZ];
     char read[TEXT_SZ];
     char exit[5];
     sem_t sem1;
     sem_t sem2;
-    int readi;
 };
-void* input(void* data);
-
 int main(){
+    struct shared_actions actions0;
+    struct shared_actions* actions;
 
-    struct shared_actions* actions = malloc(sizeof(struct shared_actions));
+    actions = &actions0;
     strcpy(actions->exit, EXIT_PROGRAM);
 
     char buffer[BUFSIZ];
-
     key_t key = 12345; 
     // if(key = ftok("proccessB", 'B') == - 1){    
     //     fprintf(stderr, "Key Creation Failed\n");
     //     exit(EXIT_FAILURE);
     // }
-
     int shmid;
     shmid = shmget((key_t)12345, sizeof(struct shared_actions), 0666 | IPC_CREAT);
     if (shmid == -1) {
         fprintf(stderr, "Shmget Failed\n");
         exit(EXIT_FAILURE);
     }
-
     void *shared_memory = (void *)0;
     shared_memory = shmat(shmid, (void *)0, 0);
     if (shared_memory == (void *)-1) {
@@ -59,30 +57,23 @@ int main(){
     }
     printf("Shared memory segment with id %d attached at %p\n", shmid, shared_memory);
 
+
     int running = 1;
     actions = (struct shared_actions *)shared_memory;
 
-
-    // pthread_t th_input;
-    // actions->readi = 1;
-    
-    // pthread_join(th_input, NULL);
-
-    
     while(running){
         printf("B IS TRYING TO UNBLOCK A \n");
 
         sem_post(&actions->sem1);
-        // while(actions->readi){
-        //     pthread_create(&th_input, NULL, input, (void*)actions);
-        //     pthread_join(th_input, NULL);
-        // }
-        // printf("%d ", actions->readi);
+        // if(actions->readA)
+
+        while(!actions->readA){
+            printf("waiting for input");
+        }
 
         printf("PROCB IS EXITING....\n");
         running = 0;
     }
-    
 
 
     //TODO: create thread to exit
@@ -94,19 +85,20 @@ int main(){
 		fprintf(stderr, "shmctl(IPC_RMID) failed\n");
 		exit(EXIT_FAILURE);
 	}
+// return 0;
 }
 
-void* input(void* data){
-    // char* inp = malloc(sizeof(BUFSIZ));
-    // inp = (char*)data;
-    struct shared_actions* share = malloc(sizeof(struct shared_actions));
-    share = (struct shared_actions*) data;
+// void* input(void* data){
+//     // char* inp = malloc(sizeof(BUFSIZ));
+//     // inp = (char*)data;
+//     struct shared_actions* share = malloc(sizeof(struct shared_actions));
+//     share = (struct shared_actions*) data;
     
 
-    printf("FROM THREAD\n");
+//     printf("FROM THREAD\n");
 
-    while(share->readi){
-	    fgets((char*)share->read, BUFSIZ, stdin);
-        share->readi = 0;
-    }
-}
+//     while(share->readi){
+// 	    fgets((char*)share->read, BUFSIZ, stdin);
+//         share->readi = 0;
+//     }
+// }

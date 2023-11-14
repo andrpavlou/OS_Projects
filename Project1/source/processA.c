@@ -16,13 +16,14 @@
 #include <pthread.h>
 
 
+void* input(void* data);
 
 
 #define SEM_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
 #define INITIAL_VALUE 0
-
 struct shared_actions{
-    int readi;
+    int readA;
+    int ReadB;
     char write[TEXT_SZ];
     char read[TEXT_SZ];
     char exit[5];
@@ -30,22 +31,23 @@ struct shared_actions{
     sem_t sem2;
 };
 
-
-
-void* input(void* data);
-
+long th_ret = 0; 
 
 int main(){
 
-    char* buffer = malloc(sizeof(BUFSIZ));
-    // struct shared_actions actions0;
-    struct shared_actions* actions = malloc(sizeof(struct shared_actions));
-    // actions = &actions0;
-
+    struct shared_actions actions0;
+    struct shared_actions* actions ;
+    actions = &actions0;
+    actions->readA = 0;
+    actions->readA = 0;
     strcpy(actions->exit, EXIT_PROGRAM);
-
-    //key??
+    char buffer[BUFSIZ];
     key_t key; 
+
+    // if(key = ftok("proccessA", 'A') == - 1){    
+    //     fprintf(stderr, "Key Creation Failed\n");
+    //     exit(EXIT_FAILURE);
+    // }
 
     int shmid;
     shmid = shmget((key_t)12345, sizeof(struct shared_actions), 0666 | IPC_CREAT);
@@ -61,6 +63,7 @@ int main(){
         exit(EXIT_FAILURE);
     }
     printf("Shared memory segment with id %d attached at %p\n", shmid, shared_memory);
+
     int running = 1;
 
 
@@ -68,65 +71,79 @@ int main(){
 
     //1 is to be shared across other proccesses
     //TODO: elegox gia fail
+    
+    actions->readA = 0;
+
+
     sem_init(&actions->sem1, 1, INITIAL_VALUE);
     sem_init(&actions->sem2, 1, INITIAL_VALUE);
-    
 
+    pthread_t th_input;
 
-    // pthread_t th_input;
-    // int it = 0;
-
-
-    // actions->readi = 1;
-
-    // pthread_cancel(th_input);
-
-    ////////////////////////////////
-
-
+    //free at the end
+    int *th_ret;
     while(running){
         printf("BLOCKED A: \n");        
-        // sem_wait(&actions->sem1);
-        int value;
-        sem_getvalue(&actions->sem1, &value);
-        printf("%d\n",value);
 
-        // while(actions->readi){
-        //     pthread_create(&th_input, NULL, input, (void*)actions);
-        //     pthread_join(th_input, NULL);
+        sem_wait(&actions->sem1);
+        pthread_create(&th_input, NULL, input, (void*)actions);
+
+        // if(actions->ReadB)
+        //     pthread_cancel(th_input);
+
+        while(1){
+            pthread_join(th_input, (void**)&th_ret);
+            if(*(int*)th_ret == 1){
+                actions->readA = 1;
+                break;
+            }
+                
+        }
+
+
+
+            // if(outp == 1){
+            //     actions->readA = 1;
+            //     break;
+            // }
         // }
 
-        //Randevou point.
+        // printf("return of thread: %ld ", (int*)th_ret);
 
-        printf("EXITING A: \n");
-        running = 1;
+
+        printf("UNBLOCKED A: \n");
+        running = 0;
     }
 
-
     //TODO: create thread to exit
-    //destroy sems
     if (shmdt(shared_memory) == -1) {
 		fprintf(stderr, "shmdt failed\n");
 		exit(EXIT_FAILURE);
 	}
-	if (shmctl(shmid, IPC_RMID, 0) == -1) {
-		fprintf(stderr, "shmctl(IPC_RMID) failed\n");
-		exit(EXIT_FAILURE);
-	}
+
+
+// return 0;
 }
+
 
 
 void* input(void* data){
     // char* inp = malloc(sizeof(BUFSIZ));
     // inp = (char*)data;
+
     struct shared_actions* share = malloc(sizeof(struct shared_actions));
     share = (struct shared_actions*) data;
     
 
     printf("FROM THREAD\n");
 
-    while(share->readi){
-	    fgets((char*)share->read, BUFSIZ, stdin);
-        share->readi = 0;
-    }
+
+	fgets((char*)share->read, BUFSIZ, stdin);
+
+    
+    int* outp = malloc(sizeof(int));
+    int num = 1;
+    *outp = num;
+    
+    return (void*) outp;    
 }
