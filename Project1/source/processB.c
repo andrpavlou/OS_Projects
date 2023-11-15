@@ -1,6 +1,7 @@
 #define TEXT_SZ 2048
+#define TEXT_EX 5
 #define EXIT_PROGRAM "#BYE#"
-#define KEY 10101
+#define KEY 101011
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -17,6 +18,7 @@
 
 
 void* input(void* data);
+void* output(void* data);
 
 #define SEM_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
 #define INITIAL_VALUE 0
@@ -24,9 +26,10 @@ void* input(void* data);
 struct shared_actions{
     int readA;
     int readB;
+    int last_sentence;
     char write[TEXT_SZ];
     char read[TEXT_SZ];
-    char exit[5];
+    char exit[TEXT_EX];
     sem_t sem1;
     sem_t sem2;
 };
@@ -60,11 +63,11 @@ int main(){
 
     int running = 1;
     actions = (struct shared_actions *)shared_memory;
-    pthread_t th_input;
+    pthread_t th_input, th_output;
     int *th_ret;
 
-    while(running){
-        printf("B IS TRYING TO UNBLOCK A \n");
+    while(running != 4){
+        // printf("B IS TRYING TO UNBLOCK A \n");
 
         sem_post(&actions->sem1);
         pthread_create(&th_input, NULL, input, (void*)actions);
@@ -76,12 +79,20 @@ int main(){
 
         pthread_join(th_input, (void**)&th_ret);
 
+        if(actions->readB)
+            sem_wait(&actions->sem2);
 
-        printf("PROCB IS EXITING....\n");
-        running = 0;
+        if(actions->readA){
+            pthread_create(&th_output, NULL, output, (void*)actions);
+            sem_post(&actions->sem2);
+        }
+        pthread_join(th_output, NULL);
+
+        actions->readB = 0;
+        // printf("PROCB IS EXITING....\n");
+        running++;
+        // printf(" %s ", actions->read);
     }
-    printf(" %s ", actions->read);
-
 
     //TODO: create thread to exit
     if (shmdt(shared_memory) == -1) {
@@ -95,7 +106,12 @@ int main(){
 
 }
  
+void* output(void* data){   
+    struct shared_actions* share;
+    share = (struct shared_actions*) data;
 
+    printf("YOU WROTE: %s", share->read);
+}
 
 void* input(void* data){
     // char* inp = malloc(sizeof(BUFSIZ));
@@ -105,9 +121,7 @@ void* input(void* data){
     struct shared_actions* share;
     share = (struct shared_actions*) data;
     
-
-    printf("FROM THREAD\n");
-
+    printf("GIVE INPUT B:\n");
 
 	fgets((char*)outp, BUFSIZ, stdin);
 
@@ -122,9 +136,11 @@ void* input(void* data){
 
     char temp[BUFSIZ];
     lasti -= 1;
+    share->last_sentence = lasti;
+
 
     if(lasti <= 15)
-        strncpy(share->read, outp, 15);
+        strcat(share->read, outp);
 
     if(lasti > 15){
         int transfers = lasti / 15;
@@ -138,10 +154,8 @@ void* input(void* data){
         }
         if(rems >= 1){
             char lasts[rems];
-
             strncpy(lasts, outp + (itters) * 15, 14);
             strcat(share->read, lasts);
-            
         }
     }
 
@@ -152,3 +166,6 @@ void* input(void* data){
   
     return (void*) outp1;    
 }
+
+
+
