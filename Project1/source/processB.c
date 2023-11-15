@@ -1,6 +1,6 @@
 #define TEXT_SZ 2048
 #define EXIT_PROGRAM "#BYE#"
-
+#define KEY 10101
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -38,13 +38,13 @@ int main(){
     strcpy(actions->exit, EXIT_PROGRAM);
 
     char buffer[BUFSIZ];
-    key_t key = 12345; 
+    key_t key = KEY; 
     // if(key = ftok("proccessB", 'B') == - 1){    
     //     fprintf(stderr, "Key Creation Failed\n");
     //     exit(EXIT_FAILURE);
     // }
     int shmid;
-    shmid = shmget((key_t)12345, sizeof(struct shared_actions), 0666 | IPC_CREAT);
+    shmid = shmget(key, sizeof(struct shared_actions), 0666 | IPC_CREAT);
     if (shmid == -1) {
         fprintf(stderr, "Shmget Failed\n");
         exit(EXIT_FAILURE);
@@ -80,6 +80,7 @@ int main(){
         printf("PROCB IS EXITING....\n");
         running = 0;
     }
+    printf(" %s ", actions->read);
 
 
     //TODO: create thread to exit
@@ -93,24 +94,61 @@ int main(){
 	}
 
 }
+ 
+
 
 void* input(void* data){
     // char* inp = malloc(sizeof(BUFSIZ));
     // inp = (char*)data;
+    char outp[BUFSIZ];
 
-    struct shared_actions* share = malloc(sizeof(struct shared_actions));
+    struct shared_actions* share;
     share = (struct shared_actions*) data;
     
 
     printf("FROM THREAD\n");
 
 
-	fgets((char*)share->read, BUFSIZ, stdin);
+	fgets((char*)outp, BUFSIZ, stdin);
+
     share->readB = 1;
+
+    int lasti = 0;
+    char last = outp[lasti];
+    while(last != '\0'){
+        lasti++;
+        last = outp[lasti];
+    }
+
+    char temp[BUFSIZ];
+    lasti -= 1;
+
+    if(lasti <= 15)
+        strncpy(share->read, outp, 15);
+
+    if(lasti > 15){
+        int transfers = lasti / 15;
+        int rems = lasti % 15;
+        int itters = 0;
+
+        while(itters < transfers){
+            strncpy(temp, outp + itters * 15, 15);
+            itters ++ ;
+            strcat(share->read, temp);
+        }
+        if(rems >= 1){
+            char lasts[rems];
+
+            strncpy(lasts, outp + (itters) * 15, 14);
+            strcat(share->read, lasts);
+            
+        }
+    }
+
     
-    int* outp = malloc(sizeof(int));
+    int* outp1 = malloc(sizeof(int));
     int num = 1;
-    *outp = num;
-    
-    return (void*) outp;    
+    *outp1 = num;
+  
+    return (void*) outp1;    
 }
