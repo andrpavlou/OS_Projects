@@ -70,6 +70,7 @@ int main(){
         // printf("B IS TRYING TO UNBLOCK A \n");
 
         sem_post(&actions->sem1);
+
         pthread_create(&th_input, NULL, input, (void*)actions);
 
         while(!actions->readB && !actions->readA);
@@ -86,12 +87,12 @@ int main(){
             pthread_create(&th_output, NULL, output, (void*)actions);
             sem_post(&actions->sem2);
         }
-        pthread_join(th_output, NULL);
+        if(actions->readA)
+            pthread_join(th_output, NULL);
 
         actions->readB = 0;
-        // printf("PROCB IS EXITING....\n");
         running++;
-        // printf(" %s ", actions->read);
+        printf("\n\n\n %d ", running);
     }
 
     //TODO: create thread to exit

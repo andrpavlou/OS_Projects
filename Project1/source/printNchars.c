@@ -4,14 +4,15 @@
 
 
 int main(){
-    int n = 4;
+    int n = 10;
 
 
     char s[] = "Hello worlds";
     int size = strlen(s);
-    int offset = size - 4;
+    int offset = size - n;
 
     char temp[1000];
+    //n + 1 for '\0'
     strncpy(temp, s + offset - 1, n + 1);
 
 

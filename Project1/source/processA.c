@@ -88,8 +88,7 @@ int main(){
 
         sem_wait(&actions->sem1);
         pthread_create(&th_input, NULL, input, (void*)actions);
-        // if(actions->ReadB)
-        //     pthread_cancel(th_input); 
+     
         
         while(!actions->readB && !actions->readA);
         
@@ -98,7 +97,6 @@ int main(){
 
         pthread_join(th_input, (void**)&th_ret);
 
-        // printf("UNBLOCKED A: \n");
         
         if(actions->readA)
             sem_wait(&actions->sem2);
@@ -107,10 +105,13 @@ int main(){
             pthread_create(&th_output, NULL, output, (void*)actions);
             sem_post(&actions->sem2);
         }
-        pthread_join(th_output, NULL);
+        if(actions->readB)
+            pthread_join(th_output, NULL);
 
         running++;
         actions->readA = 0;
+        printf("\n\n\n %d ", running);
+
         // sem_wait(&actions->sem1);
     }
 
