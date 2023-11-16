@@ -110,7 +110,6 @@ int main(){
 
         running++;
         actions->readA = 0;
-        printf("\n\n\n %d ", running);
 
         // sem_wait(&actions->sem1);
     }
@@ -128,7 +127,20 @@ void* output(void* data){
     struct shared_actions* share;
     share = (struct shared_actions*) data;
 
-    printf("YOU WROTE: %s", share->read);
+    int n = share->last_sentence;
+
+    int size = strlen(share->read);
+    int offset = size - n;
+
+    char* temp = malloc(sizeof(n + 1));
+    temp = (share->read + offset - 1);
+
+    strncpy(temp, share->read + offset - 1, n + 1);
+
+
+    printf("PROCESS B WROTE: %s", temp);
+    temp = NULL;
+    free(temp);
 }
 
 

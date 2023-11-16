@@ -67,7 +67,6 @@ int main(){
     int *th_ret;
 
     while(running != 4){
-        // printf("B IS TRYING TO UNBLOCK A \n");
 
         sem_post(&actions->sem1);
 
@@ -92,7 +91,6 @@ int main(){
 
         actions->readB = 0;
         running++;
-        printf("\n\n\n %d ", running);
     }
 
     //TODO: create thread to exit
@@ -111,12 +109,23 @@ void* output(void* data){
     struct shared_actions* share;
     share = (struct shared_actions*) data;
 
-    printf("YOU WROTE: %s", share->read);
+    int n = share->last_sentence;
+
+    int size = strlen(share->read);
+    int offset = size - n;
+
+    char* temp = malloc(sizeof(n + 1));
+    temp = (share->read + offset - 1);
+
+    strncpy(temp, share->read + offset - 1, n + 1);
+
+
+    printf("PROCESS A WROTE: %s", temp);
+    temp = NULL;
+    free(temp);
 }
 
 void* input(void* data){
-    // char* inp = malloc(sizeof(BUFSIZ));
-    // inp = (char*)data;
     char outp[BUFSIZ];
 
     struct shared_actions* share;
