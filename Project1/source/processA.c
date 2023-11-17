@@ -1,7 +1,8 @@
 #define TEXT_SZ 2048
 #define TEXT_EX 5
 #define EXIT_PROGRAM "#BYE#"
-#define KEY 101011
+#define EXIT_PROGRAM_CHARS 5
+#define KEY 1010556
 
 
 
@@ -29,30 +30,29 @@ struct shared_actions{
     int readA;
     int readB;
     int last_sentence;
-    char write[TEXT_SZ];
-    char read[TEXT_SZ];
+    int running;
+    int total_size;
+    char read[BUFSIZ];
     char exit[TEXT_EX];
     sem_t sem1;
     sem_t sem2;
+    sem_t sem3;
 };
 
-long th_ret = 0; 
 
 int main(){
 
     struct shared_actions actions0;
     struct shared_actions* actions ;
     actions = &actions0;
-    actions->readA = 0;
-    actions->readA = 0;
-    strcpy(actions->exit, EXIT_PROGRAM);
-    char buffer[BUFSIZ];
-    key_t  key = KEY; 
 
-    // if(key = ftok("proccessA", 'A') == - 1){    
-    //     fprintf(stderr, "Key Creation Failed\n");
-    //     exit(EXIT_FAILURE);
-    // }
+    actions->readA = 0;
+    actions->readA = 0;
+    actions->total_size = 0;
+    actions->running = 1;
+    strncpy(actions->exit, EXIT_PROGRAM, EXIT_PROGRAM_CHARS);
+
+    key_t  key = KEY; 
 
     int shmid;
     shmid = shmget(key, sizeof(struct shared_actions), 0666 | IPC_CREAT);
@@ -77,18 +77,23 @@ int main(){
     //TODO: elegox gia fail
     sem_init(&actions->sem1, 1, INITIAL_VALUE);
     sem_init(&actions->sem2, 1, INITIAL_VALUE);
+    sem_init(&actions->sem3, 1, INITIAL_VALUE);
 
     pthread_t th_input, th_output;
 
     //free at the end
     int *th_ret;
+    actions->running = 1;
     int running = 1;
-    while(running != 4){
-        // printf("BLOCKED A: \n");        
+    while(running){
 
         sem_wait(&actions->sem1);
+        sem_post(&actions->sem3);
+
+        if(!actions->running)
+            break;
+
         pthread_create(&th_input, NULL, input, (void*)actions);
-     
         
         while(!actions->readB && !actions->readA);
         
@@ -108,13 +113,8 @@ int main(){
         if(actions->readB)
             pthread_join(th_output, NULL);
 
-        running++;
         actions->readA = 0;
-
-        // sem_wait(&actions->sem1);
     }
-
-
 
     //TODO: create thread to exit
     if (shmdt(shared_memory) == -1) {
@@ -133,43 +133,42 @@ void* output(void* data){
     int offset = size - n;
 
     char* temp = malloc(sizeof(n + 1));
-    temp = (share->read + offset - 1);
+    temp = (share->read + offset);
 
-    strncpy(temp, share->read + offset - 1, n + 1);
+    strncpy(temp, share->read + offset - 1, n);
 
 
-    printf("PROCESS B WROTE: %s", temp);
+    printf("\nPROCESS B WROTE: %s\n", temp);
+    if(strcmp(temp, share->exit) == 0)
+        share->running = 0;
     temp = NULL;
     free(temp);
 }
 
 
-
 void* input(void* data){
-    // char* inp = malloc(sizeof(BUFSIZ));
-    // inp = (char*)data;
     char outp[BUFSIZ];
 
     struct shared_actions* share;
     share = (struct shared_actions*) data;
     
-
-    printf("GIVE INPUT A:\n");
-
+    printf("GIVE INPUT A:");
 
 	fgets((char*)outp, BUFSIZ, stdin);
-
     share->readA = 1;
 
-    int lasti = 0;
-    char last = outp[lasti];
-    while(last != '\0'){
-        lasti++;
-        last = outp[lasti];
+ 
+    if(strlen(share->read) + strlen(outp) > BUFSIZ - EXIT_PROGRAM_CHARS){
+        long remaining = BUFSIZ - strlen(share->read) - EXIT_PROGRAM_CHARS - 1;
+        printf("AFTER THIS MESSAGE BUFFER WILL FULL, ONLY %ld CHARACTERS REMAINING, TYPE #BYE# OR TYPE A SMALLER MESSAGE", remaining);
+        return 0;
     }
 
-    char temp[BUFSIZ];
-    lasti -= 1;
+
+    int lasti = strlen(outp) - 1;
+    
+    char temp[lasti + 1];
+
     share->last_sentence = lasti;
 
     if(lasti <= 15)
@@ -194,10 +193,5 @@ void* input(void* data){
         }
     }
 
-    
-    int* outp1 = malloc(sizeof(int));
-    int num = 1;
-    *outp1 = num;
-  
-    return (void*) outp1;    
+    return 0;    
 }

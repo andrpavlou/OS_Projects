@@ -2,6 +2,10 @@ procA:
 	gcc -pthread -o processA processA.c
 	gcc -pthread -o processB processB.c
 
-run:
+run1:
+	clear
 	./processA
-	rm processA
+
+run2:
+	clear
+	./processB
