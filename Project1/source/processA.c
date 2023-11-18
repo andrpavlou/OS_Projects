@@ -132,15 +132,19 @@ void* output(void* data){
     int size = strlen(share->read);
     int offset = size - n;
 
-    char* temp = malloc(sizeof(n + 1));
-    temp = (share->read + offset);
+    char* temp = malloc((n) * sizeof(char));
 
-    strncpy(temp, share->read + offset - 1, n);
+    strncpy(temp, (share->read + offset), n);
 
 
-    printf("\nPROCESS B WROTE: %s\n", temp);
-    if(strcmp(temp, share->exit) == 0)
+    printf("\nPROCESS B WROTE: %s", temp);
+
+    char ex[EXIT_PROGRAM_CHARS];
+    strncpy(ex, temp, EXIT_PROGRAM_CHARS);
+
+    if(strcmp(ex, share->exit) == 0)
         share->running = 0;
+
     temp = NULL;
     free(temp);
 }
@@ -157,19 +161,20 @@ void* input(void* data){
 	fgets((char*)outp, BUFSIZ, stdin);
     share->readA = 1;
 
+   
  
     if(strlen(share->read) + strlen(outp) > BUFSIZ - EXIT_PROGRAM_CHARS){
         long remaining = BUFSIZ - strlen(share->read) - EXIT_PROGRAM_CHARS - 1;
         printf("AFTER THIS MESSAGE BUFFER WILL FULL, ONLY %ld CHARACTERS REMAINING, TYPE #BYE# OR TYPE A SMALLER MESSAGE", remaining);
         return 0;
     }
-
+    
 
     int lasti = strlen(outp) - 1;
     
     char temp[lasti + 1];
 
-    share->last_sentence = lasti;
+    share->last_sentence = lasti + 1;
 
     if(lasti <= 15)
         strcat(share->read, outp);
@@ -185,9 +190,9 @@ void* input(void* data){
             strcat(share->read, temp);
         }
         if(rems >= 1){
-            char lasts[rems];
+            char lasts[15];
 
-            strncpy(lasts, outp + (itters) * 15, 14);
+            strncpy(lasts, outp + (itters) * 15, 15);
             strcat(share->read, lasts);
             
         }

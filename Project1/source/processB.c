@@ -42,7 +42,7 @@ int main(){
     struct shared_actions* actions;
 
     actions = &actions0;
-    strcpy(actions->exit, EXIT_PROGRAM);
+    strncpy(actions->exit, EXIT_PROGRAM, EXIT_PROGRAM_CHARS);
 
     key_t key = KEY; 
 
@@ -123,15 +123,17 @@ void* output(void* data){
     int size = strlen(share->read);
     int offset = size - n;
 
-    char* temp = malloc(sizeof(n + 1));
-    temp = (share->read + offset);
+    char* temp = malloc((n) * sizeof(char));
 
-    strncpy(temp, share->read + offset - 1, n);
+    strncpy(temp, (share->read + offset), n);
 
 
-    printf("\nPROCESS A WROTE: %s\n", temp);
+    printf("\nPROCESS A WROTE: %s", temp);
 
-    if(strcmp(temp, share->exit) == 0)
+    char ex[EXIT_PROGRAM_CHARS];
+    strncpy(ex, temp, EXIT_PROGRAM_CHARS);
+
+    if(strcmp(ex, share->exit) == 0)
         share->running = 0;
 
     temp = NULL;
@@ -158,7 +160,7 @@ void* input(void* data){
     int lasti = strlen(outp) - 1;
     char temp[lasti + 1];
 
-    share->last_sentence = lasti;
+    share->last_sentence = lasti + 1;
     if(lasti <= 15)
         strcat(share->read, outp);
 
@@ -173,8 +175,8 @@ void* input(void* data){
             strcat(share->read, temp);
         }
         if(rems >= 1){
-            char lasts[rems];
-            strncpy(lasts, outp + (itters) * 15, 14);
+            char lasts[15];
+            strncpy(lasts, outp + (itters) * 15, 15);
             strcat(share->read, lasts);
         }
     }
