@@ -29,7 +29,7 @@ struct shared_actions{
     int readB;
     int last_sentence;
     int running;
-    int total_size;
+    int buff_full;
     char read[BUFSIZ];
     char exit[TEXT_EX];
     sem_t sem1;
@@ -43,6 +43,8 @@ int main(){
 
     actions = &actions0;
     strncpy(actions->exit, EXIT_PROGRAM, EXIT_PROGRAM_CHARS);
+    actions->running = 1;
+    actions->buff_full = 0;
 
     key_t key = KEY; 
 
@@ -68,10 +70,8 @@ int main(){
 
     strncpy(actions->exit, EXIT_PROGRAM, EXIT_PROGRAM_CHARS);
 
-    actions->running = 1;
-    actions->total_size = 0;
-    int running = 1;
 
+    int running = 1;
     while(running){
 
         sem_post(&actions->sem1);
@@ -128,10 +128,16 @@ void* output(void* data){
     strncpy(temp, (share->read + offset), n);
 
 
-    printf("\nPROCESS A WROTE: %s", temp);
-
+    if(share->buff_full != 1)
+        printf("\nPROCESS B WROTE:%s", temp);
+    else{
+        printf("\n\n\nCOULD NOT LOAD MESSAGE, TOO LONG OR BUFFER IS FULL.");
+        printf("\nIF YOU SENT WAY T0O LONG MESSAGES TYPE:%s\n", EXIT_PROGRAM);
+    }
     char ex[EXIT_PROGRAM_CHARS];
-    strncpy(ex, temp, EXIT_PROGRAM_CHARS);
+
+    if(strlen(temp) == EXIT_PROGRAM_CHARS + 1)
+        strncpy(ex, temp, EXIT_PROGRAM_CHARS);
 
     if(strcmp(ex, share->exit) == 0)
         share->running = 0;
@@ -150,12 +156,22 @@ void* input(void* data){
 
 	fgets((char*)outp, BUFSIZ, stdin);
     share->readB = 1;
+
     
-    if(strlen(share->read) + strlen(outp) > BUFSIZ - EXIT_PROGRAM_CHARS){
-        long remaining = BUFSIZ - strlen(share->read) - EXIT_PROGRAM_CHARS - 1;
-        printf("AFTER THIS MESSAGE BUFFER WILL FULL, ONLY %ld CHARACTERS REMAINING, TYPE #BYE# OR TYPE A SMALLER MESSAGE", remaining);
+    char ex[EXIT_PROGRAM_CHARS];
+    if(strlen(outp) == EXIT_PROGRAM_CHARS + 1)
+        strncpy(ex, outp, EXIT_PROGRAM_CHARS);
+
+
+    if(strlen(share->read) + strlen(outp) > 20 - EXIT_PROGRAM_CHARS && strcmp(ex, share->exit) != 0){
+        long remaining = 20 - strlen(share->read) - EXIT_PROGRAM_CHARS - 1;
+
+        share->buff_full = 1;
+
+        printf("\n\n\nAFTER THIS MESSAGE BUFFER WILL FULL, ONLY %ld CHARACTERS REMAINING, TYPE %s OR TYPE A SMALLER MESSAGE.\n", remaining, EXIT_PROGRAM);
         return 0;
     }
+    share->buff_full = 0;
 
     int lasti = strlen(outp) - 1;
     char temp[lasti + 1];
