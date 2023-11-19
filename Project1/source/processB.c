@@ -2,6 +2,8 @@
 #define TEXT_EX 5
 #define EXIT_PROGRAM "#BYE#"
 #define EXIT_PROGRAM_CHARS 5
+#define BUFF_SIZE BUFSIZ / 2 //4096 default buffer
+
 #define KEY 1010556
 
 #include <unistd.h>
@@ -147,24 +149,26 @@ void* output(void* data){
 }
 
 void* input(void* data){
-    char outp[BUFSIZ];
+    char outp[BUFF_SIZE];
 
     struct shared_actions* share;
     share = (struct shared_actions*) data;
     
     printf("GIVE INPUT B:");
 
-	fgets((char*)outp, BUFSIZ, stdin);
+	fgets((char*)outp, BUFF_SIZE, stdin);
     share->readB = 1;
 
-    
-    char ex[EXIT_PROGRAM_CHARS];
-    if(strlen(outp) == EXIT_PROGRAM_CHARS + 1)
-        strncpy(ex, outp, EXIT_PROGRAM_CHARS);
+    char ex[EXIT_PROGRAM_CHARS + 1];
+    char ex1[EXIT_PROGRAM_CHARS];
 
+    if(strlen(outp) == EXIT_PROGRAM_CHARS + 1){
+        strcat(ex1, outp);
+        strncpy(ex, ex1, EXIT_PROGRAM_CHARS);
+    }
 
-    if(strlen(share->read) + strlen(outp) > 20 - EXIT_PROGRAM_CHARS && strcmp(ex, share->exit) != 0){
-        long remaining = 20 - strlen(share->read) - EXIT_PROGRAM_CHARS - 1;
+    if(strlen(share->read) + strlen(outp) > BUFF_SIZE - EXIT_PROGRAM_CHARS && strcmp(ex, share->exit) != 0){
+        long remaining = BUFF_SIZE - strlen(share->read) - EXIT_PROGRAM_CHARS - 1;
 
         share->buff_full = 1;
 
