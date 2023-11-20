@@ -6,7 +6,8 @@
 #define TEXT_EX 5
 #define EXIT_PROGRAM "#BYE#"
 #define EXIT_PROGRAM_CHARS 5
-#define BUFF_SIZE BUFSIZ / 2 //4096 default buffer
+#define BUFF_SIZE  BUFSIZ / 2 //4096 default buffersize
+#define KEY 12121
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -20,6 +21,9 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <pthread.h>
+
+#define SEM_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
+#define INITIAL_VALUE 0
 
 void* outputB(void* data);
 void* inputB(void* data);

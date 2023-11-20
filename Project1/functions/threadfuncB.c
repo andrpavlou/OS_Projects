@@ -17,6 +17,7 @@ struct shared_actions{
 
     char read[BUFSIZ];
     char exit[TEXT_EX];
+    
     sem_t sem1;
     sem_t sem2;
     sem_t sem3;
