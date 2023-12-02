@@ -7,7 +7,7 @@
 #define EXIT_PROGRAM "#BYE#"
 #define EXIT_PROGRAM_CHARS 5
 #define BUFF_SIZE  BUFSIZ / 2 //4096 default buffersize
-#define KEY 12121
+#define KEY 123456799
 
 #include <unistd.h>
 #include <stdlib.h>

@@ -16,6 +16,7 @@ struct shared_actions{
     int mes_splitsB;
 
     char read[BUFSIZ];
+    char inp[TEXT_SZ];
     char exit[TEXT_EX];
 
     sem_t sem1;
@@ -65,39 +66,13 @@ int main(){
     strncpy(actions->exit, EXIT_PROGRAM, EXIT_PROGRAM_CHARS);
 
 
-    int running = 1;
-    while(running){
+    sem_post(&actions->sem1);
+    sem_wait(&actions->sem3);
 
-        sem_post(&actions->sem1);
-        sem_wait(&actions->sem3);
+    pthread_create(&th_input, NULL, inputB, (void*)actions);
+    pthread_join(th_input, (void**)&th_ret);
 
-        if(!actions->running)
-            break;
 
-        pthread_create(&th_input, NULL, inputB, (void*)actions);
-
-        while(!actions->readB && !actions->readA);
-
-        if(actions->readA)
-            pthread_cancel(th_input);
-
-        pthread_join(th_input, (void**)&th_ret);
-
-        if(actions->readB){
-            actions->mes_sentB ++;
-            sem_wait(&actions->sem2);
-        }
-        if(actions->readA){
-            pthread_create(&th_output, NULL, outputB, (void*)actions);
-            sem_post(&actions->sem2);
-            actions->mes_receivedB ++;
-        }
-        if(actions->readA)
-            pthread_join(th_output, NULL);
-        
-        actions->readB = 0;
-    }
-     
     float splitspmsg = 0;
     if(actions->mes_sentB !=0)
         splitspmsg = (float)actions->mes_splitsB / actions->mes_sentB;
