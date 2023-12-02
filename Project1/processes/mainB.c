@@ -43,7 +43,6 @@ int main(){
 
     key_t key = KEY; 
 
-
     int shmid;
     shmid = shmget(key, sizeof(struct shared_actions), 0666 | IPC_CREAT);
     if (shmid == -1) {
@@ -76,6 +75,7 @@ int main(){
     float splitspmsg = 0;
     if(actions->mes_sentB !=0)
         splitspmsg = (float)actions->mes_splitsB / actions->mes_sentB;
+
 
     sem_wait(&actions->sem2);
     printf("\n\n\n\n\n\n\n");

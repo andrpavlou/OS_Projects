@@ -42,7 +42,6 @@ void* inputA(void* data){
     int running = 1;
     while(share->running){
 
-
             share->readA = 0;
             share->readB = 0;
 
@@ -129,8 +128,7 @@ void* inputA(void* data){
                 strncpy(ex, temp, EXIT_PROGRAM_CHARS);
 
             if(strcmp(ex, share->exit) == 0)
-                share->running = 0;
-                
+                share->running = 0;   
         }
         sem_wait(&share->sem1);
         sem_post(&share->sem3);

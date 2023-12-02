@@ -65,8 +65,6 @@ int main(){
     actions->readA = 0;
 
 
-    //1 is to be shared across other proccesses
-    //TODO: elegox gia fail
     sem_init(&actions->sem1, 1, INITIAL_VALUE);
     sem_init(&actions->sem2, 1, INITIAL_VALUE);
     sem_init(&actions->sem3, 1, INITIAL_VALUE);
@@ -77,14 +75,12 @@ int main(){
     actions->running = 1;
     int running = 1;
 
-
     sem_wait(&actions->sem1);
     sem_post(&actions->sem3);
 
     pthread_create(&th_input, NULL, inputA, (void*)actions);
     pthread_join(th_input, (void**)&th_ret);
 
-    
 
     float splitspmsg = 0;
     if(actions->mes_sentA !=0)

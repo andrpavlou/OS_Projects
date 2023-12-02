@@ -48,9 +48,6 @@ void* inputB(void* data){
             share->readA = 0;
             share->readB = 0;
 
-
-
-
             printf("GIVE INPUT B:");
             pthread_create(&readfromB, NULL, fgets_tread, (void*)share);
             while(!share->readA && !share->readB);
@@ -134,7 +131,6 @@ void* inputB(void* data){
 
             if(strcmp(ex, share->exit) == 0)
                 share->running = 0;
-
         }
         sem_post(&share->sem1);
         sem_wait(&share->sem3);
