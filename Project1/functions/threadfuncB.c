@@ -24,8 +24,6 @@ struct shared_actions{
     sem_t sem3;
 };
 
-
-
 void* fgets_tread(void* data){
     char outp[TEXT_SZ];
     struct shared_actions* share = (struct shared_actions*) data;
@@ -40,8 +38,6 @@ void* inputB(void* data){
     struct shared_actions* share;
     share = (struct shared_actions*) data;
 
-    int running = 1;
-    
     pthread_t readfromB;
     while(share->running){
 
@@ -56,7 +52,6 @@ void* inputB(void* data){
                 pthread_cancel(readfromB);
 
             pthread_join(readfromB, NULL);
-        
 
         if(share->readB){    
             share->mes_sentB ++;
@@ -124,7 +119,7 @@ void* inputB(void* data){
                 printf("\n\n\nCOULD NOT LOAD MESSAGE, TOO LONG OR BUFFER IS FULL.");
                 printf("\nIF YOU SENT WAY T0O LONG MESSAGES TYPE:%s\n", EXIT_PROGRAM);
             }
-
+            
             char ex[EXIT_PROGRAM_CHARS];
             if(strlen(temp) == EXIT_PROGRAM_CHARS + 1)
                 strncpy(ex, temp, EXIT_PROGRAM_CHARS);
