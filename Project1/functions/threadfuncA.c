@@ -44,8 +44,7 @@ void* inputA(void* data){
 
             share->readA = 0;
             share->readB = 0;
-
-
+        
             printf("GIVE INPUT A:");
 
             pthread_create(&readfromA, NULL, fgets_tread, (void*)share);
@@ -56,7 +55,6 @@ void* inputA(void* data){
 
             pthread_join(readfromA, NULL);
         
-
         if(share->readA){
             share->mes_sentA ++;
             char ex[EXIT_PROGRAM_CHARS + 1];
@@ -65,7 +63,6 @@ void* inputA(void* data){
                 strcat(ex1, share->inp);
                 strncpy(ex, ex1, EXIT_PROGRAM_CHARS);
             }
-
 
             if(strlen(share->read) + strlen(share->inp) > BUFF_SIZE - EXIT_PROGRAM_CHARS  && strcmp(ex, share->exit) != 0){
                 long remaining = BUFF_SIZE - strlen(share->read) - EXIT_PROGRAM_CHARS - 1;
@@ -103,7 +100,7 @@ void* inputA(void* data){
                 }
             }
         }
-
+        
         sem_wait(&share->sem1);
         sem_post(&share->sem3);
 
@@ -133,5 +130,4 @@ void* inputA(void* data){
         sem_wait(&share->sem1);
         sem_post(&share->sem3);
     }
-
 }
