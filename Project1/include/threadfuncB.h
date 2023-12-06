@@ -4,10 +4,10 @@
 
 #define TEXT_SZ 2048
 #define TEXT_EX 5
-#define EXIT_PROGRAM "#BYE#"
+#define EXIT_PROGRAM "#BYE#'\n'"
 #define EXIT_PROGRAM_CHARS 5
 #define BUFF_SIZE  BUFSIZ / 2 //4096 default buffersize
-#define KEY 1234567991
+#define KEY 52315
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -36,6 +36,8 @@ typedef struct Shared_actions{
     int mes_receivedB;
     int mes_sentA;
     int mes_sentB;
+    int max_transfers;
+    int current_transfers; 
 
     int mes_splitsA;
     int mes_splitsB;
@@ -51,6 +53,7 @@ typedef struct Shared_actions{
 
 
 void* inputOutputB(void* data);
+void* outputB(void* data);
 
 #endif 
 

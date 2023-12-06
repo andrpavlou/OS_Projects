@@ -33,6 +33,7 @@ int main(){
     //Attach shared memory.
     void *shared_memory = (void *)0;
     shared_memory = shmat(shmid, (void *)0, 0);
+
     if (shared_memory == (void *)-1) {
         fprintf(stderr, "Shmat Failed\n");
         exit(EXIT_FAILURE);
@@ -41,10 +42,12 @@ int main(){
 
     actions = (struct Shared_actions *)shared_memory;
     strncpy(actions->exit, EXIT_PROGRAM, EXIT_PROGRAM_CHARS);
+    strcat(actions->exit, "\n");
+
+
     actions->running = 1;
 
-
-    pthread_t th_readPrint;
+    pthread_t th_readPrint, th_output;
     int *th_ret;
 
 
@@ -54,7 +57,9 @@ int main(){
 
     //Thread creation that will be responsible for getting/printing the input/output of the other process.
     pthread_create(&th_readPrint, NULL, inputOutputB, (void*)actions);
+    pthread_create(&th_output, NULL, outputB, (void*)actions);
     pthread_join(th_readPrint, (void**)&th_ret);
+    pthread_join(th_output, (void**)&th_ret);
 
     //In case of dividing with 0.
     float splitspmsg = 0;

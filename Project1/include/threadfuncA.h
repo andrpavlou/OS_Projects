@@ -7,7 +7,7 @@
 #define EXIT_PROGRAM "#BYE#"
 #define EXIT_PROGRAM_CHARS 5
 #define BUFF_SIZE  BUFSIZ / 2 //4096 default buffersize
-#define KEY 1234567991
+#define KEY 52315
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -33,6 +33,8 @@ typedef struct Shared_actions{
     int last_sentence;
     int running;
     int buff_full;
+    int max_transfers;
+    int current_transfers; 
 
     int mes_receivedA;
     int mes_sentA;
@@ -53,6 +55,7 @@ typedef struct Shared_actions{
 
 
 void* inputOutputA(void* data);
+void* outputA(void* data);
 
 #endif 
 
