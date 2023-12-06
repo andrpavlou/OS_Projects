@@ -36,7 +36,7 @@ void* fgets_tread(void* data){
 }
 
 
-void* inputB(void* data){
+void* inputOutputB(void* data){
     struct shared_actions* share;
     share = (struct shared_actions*) data;
 

@@ -1,54 +1,36 @@
 #include "../include/threadfuncB.h"
 
-struct shared_actions{
-    int readA;
-    int readB;
-    int last_sentence;
-    int running;
-    int buff_full;
 
-    int mes_receivedA;
-    int mes_receivedB;
-    int mes_sentA;
-    int mes_sentB;
-
-    int mes_splitsA;
-    int mes_splitsB;
-
-    char read[BUFSIZ];
-    char inp[TEXT_SZ];
-    char exit[TEXT_EX];
-
-    sem_t sem1;
-    sem_t sem2;
-    sem_t sem3;
-};
 
 int main(){
-    struct shared_actions actions0;
-    struct shared_actions* actions;
-
+    struct Shared_actions actions0;
+    struct Shared_actions* actions;
     actions = &actions0;
-    strncpy(actions->exit, EXIT_PROGRAM, EXIT_PROGRAM_CHARS);
-    actions->running = 1;
+
+    actions->readA = 0;
+    actions->readA = 0;
     actions->buff_full = 0;
 
     actions->mes_receivedA = 0;
-    actions->mes_sentA = 0;
     actions->mes_receivedB = 0;
+    actions->mes_sentA = 0;
     actions->mes_sentB = 0;
 
     actions->mes_splitsA = 0;
     actions->mes_splitsB = 0;
 
+
     key_t key = KEY; 
 
+    //Creates a new shared memory segment, givem a key.
     int shmid;
-    shmid = shmget(key, sizeof(struct shared_actions), 0666 | IPC_CREAT);
+    shmid = shmget(key, sizeof(struct Shared_actions), 0666 | IPC_CREAT);
     if (shmid == -1) {
         fprintf(stderr, "Shmget Failed\n");
         exit(EXIT_FAILURE);
     }
+    
+    //Attach shared memory.
     void *shared_memory = (void *)0;
     shared_memory = shmat(shmid, (void *)0, 0);
     if (shared_memory == (void *)-1) {
@@ -57,27 +39,32 @@ int main(){
     }
     printf("Shared memory segment with id %d attached at %p\n", shmid, shared_memory);
 
+    actions = (struct Shared_actions *)shared_memory;
+    strncpy(actions->exit, EXIT_PROGRAM, EXIT_PROGRAM_CHARS);
+    actions->running = 1;
 
-    actions = (struct shared_actions *)shared_memory;
-    pthread_t th_input, th_output;
+
+    pthread_t th_readPrint;
     int *th_ret;
 
-    strncpy(actions->exit, EXIT_PROGRAM, EXIT_PROGRAM_CHARS);
 
-
+    //First rendezvous point between the two processes.
     sem_post(&actions->sem1);
     sem_wait(&actions->sem3);
 
-    pthread_create(&th_input, NULL, inputB, (void*)actions);
-    pthread_join(th_input, (void**)&th_ret);
+    //Thread creation that will be responsible for getting/printing the input/output of the other process.
+    pthread_create(&th_readPrint, NULL, inputOutputB, (void*)actions);
+    pthread_join(th_readPrint, (void**)&th_ret);
 
-
+    //In case of dividing with 0.
     float splitspmsg = 0;
     if(actions->mes_sentB !=0)
         splitspmsg = (float)actions->mes_splitsB / actions->mes_sentB;
 
-
     sem_wait(&actions->sem2);
+
+    //Statistics of the conversation.
+    //Process B needs to print statistics first in case process A frees shared memory, before of B's chat summary.
     printf("\n\n\n\n\n\n\n");
     printf("---------- CHAT SUMMARRY ----------\n");
     printf("MESSAGE SENT:%d\n", actions->mes_sentB);

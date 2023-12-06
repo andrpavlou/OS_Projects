@@ -7,7 +7,7 @@
 #define EXIT_PROGRAM "#BYE#"
 #define EXIT_PROGRAM_CHARS 5
 #define BUFF_SIZE  BUFSIZ / 2 //4096 default buffersize
-#define KEY 123456799
+#define KEY 1234567991
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -26,8 +26,33 @@
 #define INITIAL_VALUE 0
 
 
-void* outputA(void* data);
-void* inputA(void* data);
+
+typedef struct Shared_actions{
+    int readA;
+    int readB;
+    int last_sentence;
+    int running;
+    int buff_full;
+
+    int mes_receivedA;
+    int mes_sentA;
+    int mes_receivedB;
+    int mes_sentB;
+    
+    int mes_splitsA;
+    int mes_splitsB;
+
+    char read[BUFSIZ];
+    char inp[TEXT_SZ];
+    char exit[TEXT_EX];
+
+    sem_t sem1;
+    sem_t sem2;
+    sem_t sem3;
+}Shared_actions;
+
+
+void* inputOutputA(void* data);
 
 #endif 
 
