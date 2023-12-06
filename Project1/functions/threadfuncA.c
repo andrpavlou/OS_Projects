@@ -1,46 +1,20 @@
 #include "../include/threadfuncA.h"
 
-struct shared_actions{
-    int readA;
-    int readB;
-    int last_sentence;
-    int running;
-    int buff_full;
-
-    int mes_receivedA;
-    int mes_sentA;
-    int mes_receivedB;
-    int mes_sentB;
-    int max_transfers;
-    int current_transfers; 
-    
-    int mes_splitsA;
-    int mes_splitsB;
-
-    char read[BUFSIZ];
-    char inp[TEXT_SZ];
-    char exit[TEXT_EX];
-    
-    sem_t sem1;
-    sem_t sem2;
-    sem_t sem3;
-};
 
 //Function that will be called for pthread_create in order to be able to exit fgets.
 void* fgets_tread(void* data){
     char outp[TEXT_SZ];
-    struct shared_actions* share = (struct shared_actions*) data;
+    struct Shared_actions* share = (struct Shared_actions*) data;
 
     fgets((char*)outp, TEXT_SZ, stdin);
-    share->mes_sentA ++;
     strncpy(share->inp, outp, TEXT_SZ);
     share->readA = 1;
 }
 
 
 void* outputA(void* data){
-    struct shared_actions* share;
-    share = (struct shared_actions*) data;
+    struct Shared_actions* share;
+    share = (struct Shared_actions*) data;
 
     char ex[EXIT_PROGRAM_CHARS + 2];
     strncpy(ex, share->exit, EXIT_PROGRAM_CHARS);
@@ -79,8 +53,8 @@ void* outputA(void* data){
 }
 
 void* inputOutputA(void* data){
-    struct shared_actions* share;
-    share = (struct shared_actions*) data;
+    struct Shared_actions* share;
+    share = (struct Shared_actions*) data;
     pthread_t readfromA;
 
     int running = 1;

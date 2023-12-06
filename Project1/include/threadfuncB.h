@@ -31,14 +31,14 @@ typedef struct Shared_actions{
     int last_sentence;
     int running;
     int buff_full;
-
-    int mes_receivedA;
-    int mes_receivedB;
-    int mes_sentA;
-    int mes_sentB;
     int max_transfers;
     int current_transfers; 
 
+    int mes_receivedA;
+    int mes_sentA;
+    int mes_receivedB;
+    int mes_sentB;
+    
     int mes_splitsA;
     int mes_splitsB;
 
