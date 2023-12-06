@@ -4,6 +4,7 @@
 
 #define TEXT_SZ 2048
 #define TEXT_EX 5
+#define BATCH_SIZE 15
 #define EXIT_PROGRAM "#BYE#"
 #define EXIT_PROGRAM_CHARS 5
 #define BUFF_SIZE  BUFSIZ / 2 //4096 default buffersize
@@ -21,6 +22,7 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 #define SEM_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
 #define INITIAL_VALUE 0
@@ -44,6 +46,11 @@ typedef struct Shared_actions{
     int mes_splitsA;
     int mes_splitsB;
 
+    long start_time;
+    long end_time;
+    long dif_timeA;
+    long dif_timeB;
+    
     char read[BUFSIZ];
     char inp[TEXT_SZ];
     char exit[TEXT_EX];
@@ -54,7 +61,7 @@ typedef struct Shared_actions{
 }Shared_actions;
 
 
-void* inputOutputA(void* data);
+void* inputA(void* data);
 void* outputA(void* data);
 
 #endif 
