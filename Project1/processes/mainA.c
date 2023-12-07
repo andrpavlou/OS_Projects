@@ -29,7 +29,6 @@ int main(){
         fprintf(stderr, "Shmat Failed\n");
         exit(EXIT_FAILURE);
     }
-    printf("Shared memory segment with id %d attached at %p\n", shmid, shared_memory);
 
     actions = (struct Shared_actions *)shared_memory;    
 
@@ -43,9 +42,11 @@ int main(){
     int *th_ret;
     actions->running = 1;
 
+    system("clear");
     //First rendezvous point between the two processes, before creating threads.
     sem_wait(&actions->sem1);
     sem_post(&actions->sem3);
+
 
     //Thread creations that will be responsible for getting/printing the input/output of the other process.
     pthread_create(&th_readPrint, NULL, inputA, (void*)actions);
@@ -66,7 +67,6 @@ int main(){
     sem_post(&actions->sem2);
     sem_wait(&actions->sem1);
 
-    // system("clear");
     //Statistics of the conversation.
     printf("\n\n\n\n\n\n\n");
     printf("---------- CHAT SUMMARRY ----------\n");

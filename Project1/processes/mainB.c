@@ -25,8 +25,6 @@ int main(){
         fprintf(stderr, "Shmat Failed\n");
         exit(EXIT_FAILURE);
     }
-    printf("Shared memory segment with id %d attached at %p\n", shmid, shared_memory);
-
 
     actions = (struct Shared_actions *)shared_memory;
     strncpy(actions->exit, EXIT_PROGRAM, EXIT_PROGRAM_CHARS);
@@ -35,6 +33,7 @@ int main(){
     pthread_t th_readPrint, th_output;
     int *th_ret;
 
+    system("clear");
     //First rendezvous point between the two processes, before creating threads.
     sem_post(&actions->sem1);
     sem_wait(&actions->sem3);
@@ -56,7 +55,6 @@ int main(){
 
     sem_wait(&actions->sem2);
 
-    // system("clear");
     //Statistics of the conversation.
     //Process B needs to print statistics first in case process A frees shared memory, before of B's chat summary.
     printf("\n\n\n\n\n\n\n");

@@ -1,20 +1,21 @@
 #!/bin/bash
 
-# Conversation between two participants with seven messages each
-echo -e "Participant 1: Hey!"
-sleep 1.2
-echo -e "Participant 2: Hi! How's it going?"
-sleep 1.2
-echo -e "Participant 1: I'm doing well, thanks. How about you?"
-sleep 1.2
-echo -e "Participant 2: Pretty good, just enjoying the day."
-sleep 1.2
-echo -e "Participant 1: That's great to hear! Any plans for later?"
-sleep 1.2
-echo -e "Participant 2: Not much, maybe catching a movie."
-sleep 1.2
-echo -e "Participant 1: Nice! I might go for a hike this evening."
+# Conversation response from script2 to script1
+sleep 1.5
+echo -e "Script2: Hey, I'm here!"
 sleep 1
-echo -e "Participant 2: Sounds fun! Enjoy your hike."
+echo -e "Script2: I'm ready for the messages."
+sleep 1
+echo -e "Script2: Let's continue our conversation."
+sleep 1
+echo -e "Script2: I received the first two messages."
+sleep 0.5
+echo -e "Script2: Processing message number three!"
+sleep 3
+echo -e "Script2: I'm set for more, script1."
+sleep 1
+echo -e "Script2: Acknowledged, here comes the next message."
+sleep 1
+echo -e "Script2: Got it! I'll take it from here."
 sleep 2
 echo -e "#BYE#"
