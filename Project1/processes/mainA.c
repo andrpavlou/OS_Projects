@@ -56,23 +56,26 @@ int main(){
 
     //In case of dividing with 0.
     float splitspmsg = 0, wait_time;
-    if(actions->mes_sentA !=0){
+    if(actions->mes_sentA !=0)
         splitspmsg = (float)actions->mes_splitsA / actions->mes_sentA;
-        // wait_time = (float)actions->dif_timeA / actions->mes_receivedA;
-    }
+    
+    if(actions->mes_receivedA)
+        wait_time = (float)actions->dif_timeA / actions->mes_receivedA;
 
     
     sem_post(&actions->sem2);
     sem_wait(&actions->sem1);
 
+    // system("clear");
     //Statistics of the conversation.
     printf("\n\n\n\n\n\n\n");
     printf("---------- CHAT SUMMARRY ----------\n");
     printf("MESSAGE SENT:%d\n", actions->mes_sentA);
     printf("MESSAGE RECEIVED:%d\n", actions->mes_receivedA);
     printf("MESSAGE SPLITS IN TOTAL:%d\n", actions->mes_splitsA);
-    printf("MESSAGE SPLITS PER MESSAGE:%f\n", splitspmsg);
-    // printf("AVERAGE WAIT TIME FOR THE FIRST BATCH %0.2f MS\n\n", wait_time);
+    printf("MESSAGE SPLITS PER MESSAGE:%0.2f\n", splitspmsg);
+    printf("AVERAGE WAIT TIME FOR THE FIRST BATCH %0.2f MS\n", wait_time);
+    printf("------------------------------------\n\n");
 
     if (shmdt(shared_memory) == -1) {
 		fprintf(stderr, "shmdt failed\n");

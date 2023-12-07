@@ -47,13 +47,16 @@ int main(){
 
     //In case of dividing with 0.
     float splitspmsg = 0, wait_time;
-    if(actions->mes_sentB !=0){
+    if(actions->mes_sentB !=0)
         splitspmsg = (float)actions->mes_splitsB / actions->mes_sentB;
-        wait_time = (float)actions->dif_timeB / actions->mes_receivedA;
-    }
+    
+    if(actions->mes_receivedB)
+        wait_time = (float)actions->dif_timeB / actions->mes_receivedB;
+
 
     sem_wait(&actions->sem2);
 
+    // system("clear");
     //Statistics of the conversation.
     //Process B needs to print statistics first in case process A frees shared memory, before of B's chat summary.
     printf("\n\n\n\n\n\n\n");
@@ -61,8 +64,10 @@ int main(){
     printf("MESSAGE SENT:%d\n", actions->mes_sentB);
     printf("MESSAGE RECEIVED:%d\n", actions->mes_receivedB);
     printf("MESSAGE SPLITS IN TOTAL:%d\n", actions->mes_splitsB);
-    printf("MESSAGE SPLITS PER MESSAGE:%f\n", splitspmsg);
-    printf("AVERAGE WAIT TIME FOR THE FIRST BATCH %0.2f MS\n\n", wait_time);
+    printf("MESSAGE SPLITS PER MESSAGE:%0.2f\n", splitspmsg);
+    printf("AVERAGE WAIT TIME FOR THE FIRST BATCH %0.2f MS\n", wait_time);
+    printf("------------------------------------\n\n");
+
 
     sem_post(&actions->sem1);
 }

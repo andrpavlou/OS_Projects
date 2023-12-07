@@ -16,7 +16,7 @@ void* fgets_tread(void* data){
 void* outputB(void* data){
     struct Shared_actions* share;
     share = (struct Shared_actions*) data;
-
+    struct timeval curr_time;
     char ex[EXIT_PROGRAM_CHARS + 2];
 
     //Variable ex contains the string that terminates the processes, with the addition of change line at the end.
@@ -28,7 +28,16 @@ void* outputB(void* data){
         //Checks if the other process has registered an input.
         if(share->readA){
             //Wait for all the batches to arive before printing the whole message.
-            while(share->max_transfers > share->current_transfers);
+            while(share->max_transfers > share->current_transfers && share->buff_full == 0){
+                if(share->current_transfers == 1){
+                    gettimeofday(&curr_time, NULL);
+                    share->end_time = curr_time.tv_usec;
+                }
+            }
+            if(share->end_time == 0 || share->max_transfers == 1){
+                gettimeofday(&curr_time, NULL);
+                share->end_time = curr_time.tv_usec;
+            }
 
             share->mes_receivedB ++;
             int n = share->last_sentence;
@@ -52,6 +61,9 @@ void* outputB(void* data){
 
             share->readA = 0;
 
+            if(strcmp(msg, "\n") != 0 && share->buff_full == 0)
+                share->dif_timeB += share->end_time - share->start_time;
+
             //Unblocks the input threads.
             sem_post(&share->sem1);
             sem_post(&share->sem2);
@@ -64,14 +76,22 @@ void* inputB(void* data){
     share = (struct Shared_actions*) data;
     struct timeval current_time;
 
+    char ex[EXIT_PROGRAM_CHARS + 1];        
+    strncpy(ex, share->exit, EXIT_PROGRAM_CHARS);
+    strcat(ex, "\n");      
+
     pthread_t readfromB;
     while(share->running){
-       
         share->max_transfers = 1;
         share->current_transfers = 0;
+        share->start_time = 0;
+        share->end_time = 0;
+        share->buff_full = 0;
+        share->readA = 0;
+        share->readB = 0;
 
         //Thread responsible to get the input of other process.
-        printf("GIVE INPUT B:");
+        // printf("GIVE INPUT B:");
         pthread_create(&readfromB, NULL, fgets_tread, (void*)share);
         
         //Stucks inside while loop until one process gives input, so the other one can cancel fgets_tread to exit fgets.
@@ -88,18 +108,14 @@ void* inputB(void* data){
 
         if(share->readB){    
             share->mes_sentB ++;
-            char ex[EXIT_PROGRAM_CHARS + 1];
-            char ex1[EXIT_PROGRAM_CHARS];
+
 
             //Checks if the next message will cause buffer overflow and does not accept it, if it is too long.
-            if(strlen(share->read) + strlen(share->inp) > BUFF_SIZE - EXIT_PROGRAM_CHARS && strcmp(ex, share->exit) != 0){
-                long remaining = BUFF_SIZE - strlen(share->read) - EXIT_PROGRAM_CHARS - 1;
-
+            if(strlen(share->read) + strlen(share->inp) > BUFF_SIZE - 2 * EXIT_PROGRAM_CHARS && strcmp(ex, share->inp) != 0){
                 share->buff_full = 1;
-
+                printf("\n\n exit");
                 printf("\n\n\nAFTER THIS MESSAGE BUFFER WILL FULL, TYPE %s OR TYPE A SMALLER MESSAGE.\n", EXIT_PROGRAM);
             }
-            share->buff_full = 0;
 
             int lasti = strlen(share->inp) - 1;
             char batch[BATCH_SIZE + 1];
@@ -110,11 +126,14 @@ void* inputB(void* data){
                 share->max_transfers = 1;
                 share->mes_splitsB ++;
                 strcat(share->read, share->inp);
+
                 share->current_transfers ++;
+                gettimeofday(&current_time, NULL);
+                share->start_time = current_time.tv_usec;
             }
 
             //The message needs to be split.
-            if(lasti > 15){
+            if(lasti > 15 && share->buff_full == 0){
                 int transfers = lasti / 15;
                 int rems = lasti % 15; //Remaining characters
 
@@ -131,7 +150,10 @@ void* inputB(void* data){
                     itters ++ ;
                     strcat(share->read, batch);
                     share->mes_splitsB ++;
-                    share->current_transfers = itters;
+
+                    share->current_transfers ++;
+                    gettimeofday(&current_time, NULL);
+                    share->start_time = current_time.tv_usec;
                 }
                 //Add the remaining none 15 characters the buffer.
                 if(rems >= 1){
