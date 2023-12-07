@@ -10,6 +10,8 @@ void* fgets_tread(void* data){
     strncpy(share->inp, outp, TEXT_SZ);
 
     share->readA = 1;
+    sem_post(&share->sem1);
+    sem_post(&share->sem2);
 }
 
 
@@ -65,7 +67,7 @@ void* outputA(void* data){
             share->readB = 0;
 
             if(strcmp(msg, "\n") != 0 && share->buff_full ==0)
-                share->dif_timeA += share->end_time - share->start_time;
+                share->dif_timeA += abs(share->end_time - share->start_time);
         
             //Unblocks the input threads.
             sem_post(&share->sem1);
@@ -98,8 +100,8 @@ void* inputA(void* data){
         // printf("GIVE INPUT A:"); ////REMOVE THE COMMENT IF THE INPUT IS GIVEN MANUALLY.
         pthread_create(&readfromA, NULL, fgets_tread, (void*)share);
 
-        //Stucks inside while loop until one process gives input, so the other one can cancel fgets_tread to exit fgets.
-        while(!share->readA && !share->readB);
+        //Blocks until an input is given from either of the threads.
+        sem_wait(&share->sem1);
 
         //Cancel the thread to exit fgets because the other process has given an input.
         if(share->readB)

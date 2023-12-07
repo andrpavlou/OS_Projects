@@ -9,12 +9,12 @@ sleep 2.5
 echo -e "Script1: Let's start our conversation."
 sleep 1.5
 echo -e "Script1: Here's message number one."
-sleep 1
+sleep 0.5
 echo -e "Script1: And message number two!"
-sleep 1.5
+sleep 2
 echo -e "Script1: Are you ready for more?"
 sleep 1.5
 echo -e "Script1: Here's the next message."
 sleep 1.5
 echo -e "Script1: Okay, over to you now, script2."
-sleep 3
+sleep 5
