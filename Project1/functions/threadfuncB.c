@@ -91,7 +91,7 @@ void* inputB(void* data){
         share->readB = 0;
 
         //Thread responsible to get the input of other process.
-        // printf("GIVE INPUT B:");
+        // printf("GIVE INPUT B:"); ////REMOVE THE COMMENT IF THE INPUT IS GIVEN MANUALLY.
         pthread_create(&readfromB, NULL, fgets_tread, (void*)share);
         
         //Stucks inside while loop until one process gives input, so the other one can cancel fgets_tread to exit fgets.
