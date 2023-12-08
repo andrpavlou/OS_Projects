@@ -3,15 +3,20 @@
 
 //Thread function, responsible to get user's input.(Used it as thread to cancel fgets if neeeded).
 void* fgets_tread(void* data){
+
     struct Shared_actions* share = (struct Shared_actions*) data;
     char outp[TEXT_SZ];
+    while(share->running){
 
-    fgets((char*)outp, TEXT_SZ, stdin);
-    strncpy(share->inp, outp, TEXT_SZ);
+        fgets((char*)outp, TEXT_SZ, stdin);
+        strncpy(share->inp, outp, TEXT_SZ);
+        share->mes_sentA ++;
 
-    share->readA = 1;
-    sem_post(&share->sem1);
-    sem_post(&share->sem2);
+        share->readA = 1;
+
+        sem_post(&share->sem1);
+        sem_post(&share->sem2);
+    }
 }
 
 
@@ -26,7 +31,7 @@ void* outputA(void* data){
     strncpy(ex, share->exit, EXIT_PROGRAM_CHARS);
     strcat(ex, "\n");
 
-
+    printf("---------- START CHATTING ----------\n");
     while(share->running){
         //Checks if the other process has registered an input.
         if(share->readB){
@@ -43,7 +48,6 @@ void* outputA(void* data){
                 share->end_time = curr_time.tv_usec;
             }
 
-            share->mes_receivedA ++;
 
             int n = share->last_sentence;
             int size = strlen(share->read);
@@ -53,8 +57,10 @@ void* outputA(void* data){
             strncpy(msg, (share->read + offset), n + 1);
             
             //Prints message depending on if it will cause buffer overflow.
-            if(share->buff_full != 1)
-                printf("\nPROCESS B WROTE:%s", msg);
+            if(share->buff_full != 1){
+                printf("PROCESS B WROTE:%s", msg);
+                share->mes_receivedA ++;
+            }
             else{
                 printf("\n\n\nCOULD NOT LOAD MESSAGE, TOO LONG OR BUFFER IS FULL.");
                 printf("\nIF YOU SENT WAY T0O LONG MESSAGES TYPE:%s\n", EXIT_PROGRAM);
@@ -68,7 +74,7 @@ void* outputA(void* data){
 
             if(strcmp(msg, "\n") != 0 && share->buff_full ==0)
                 share->dif_timeA += abs(share->end_time - share->start_time);
-        
+
             //Unblocks the input threads.
             sem_post(&share->sem1);
             sem_post(&share->sem2);
@@ -82,10 +88,13 @@ void* inputA(void* data){
     struct timeval current_time;
     
     pthread_t readfromA;
+    pthread_create(&readfromA, NULL, fgets_tread, (void*)share);
 
     char ex[EXIT_PROGRAM_CHARS + 1];        
     strncpy(ex, share->exit, EXIT_PROGRAM_CHARS);
     strcat(ex, "\n");      
+    
+
     while(share->running){
         share->max_transfers = 1;
         share->current_transfers = 0;
@@ -95,26 +104,16 @@ void* inputA(void* data){
         share->readA = 0;
         share->readB = 0;
         
-        //Thread responsible to get the input of other process.
-
-        // printf("GIVE INPUT A:"); ////REMOVE THE COMMENT IF THE INPUT IS GIVEN MANUALLY.
-        pthread_create(&readfromA, NULL, fgets_tread, (void*)share);
-
-        //Blocks until an input is given from either of the threads.
-        sem_wait(&share->sem1);
-
-        //Cancel the thread to exit fgets because the other process has given an input.
-        if(share->readB)
-            pthread_cancel(readfromA);
-
-        pthread_join(readfromA, NULL);
 
         sem_wait(&share->sem1);
         sem_post(&share->sem2);
 
+        //Thread responsible to get the input of other process.
+        sem_wait(&share->sem1);
+
+
         //Splits the message into batches of 15 characters.
         if(share->readA){
-            share->mes_sentA ++;
             
             //Checks if the next message will cause buffer overflow and does not accept it, if it is too long.
             if(strlen(share->read) + strlen(share->inp) > BUFF_SIZE - 2 * EXIT_PROGRAM_CHARS  && strcmp(ex, share->inp) != 0){
@@ -123,9 +122,10 @@ void* inputA(void* data){
                 printf("\n\n\nAFTER THIS MESSAGE BUFFER WILL FULL, TYPE %s OR TYPE A SMALLER MESSAGE.\n", EXIT_PROGRAM);
             }
 
-            int lasti = strlen(share->inp) - 1;
+            long lasti = strlen(share->inp);
+
             char batch[BATCH_SIZE + 1]; 
-            share->last_sentence = lasti + 1;
+            share->last_sentence = lasti;
 
             //If the message is less than 15 characters just add it to the end of the buffer.
             if(lasti <= 15){
@@ -140,11 +140,12 @@ void* inputA(void* data){
 
             //The message needs to be split.
             if(lasti > 15 && share->buff_full == 0){
+
                 int transfers = lasti / 15;
                 int rems = lasti % 15; //Remaining characters
                 int itters = 0;
 
-                if(!rems)
+                if(rems == 0)
                     share->max_transfers = transfers;
                 else   
                     share->max_transfers = transfers + 1;
@@ -153,7 +154,6 @@ void* inputA(void* data){
                 while(itters < transfers){
                     strncpy(batch, share->inp + itters * 15, 15);
                     strcat(share->read, batch);
-
                     itters ++ ;
                     share->mes_splitsA ++;
 
@@ -174,4 +174,7 @@ void* inputA(void* data){
         //Waits until the threads, responsible for the print of the message unblock.
         sem_wait(&share->sem1);
     }
+        pthread_cancel(readfromA);
+
+        pthread_join(readfromA, NULL);
 }
