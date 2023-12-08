@@ -12,7 +12,7 @@ void* fgets_tread(void* data){
 
         share->readB = 1;
 
-
+        //Unblocks the input threads.
         sem_post(&share->sem1);
         sem_post(&share->sem2);
     }
