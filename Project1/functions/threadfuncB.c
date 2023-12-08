@@ -94,19 +94,12 @@ void* inputB(void* data){
     pthread_create(&readfromB, NULL, fgets_tread, (void*)share);
 
     while(share->running){
-        share->max_transfers = 1;
-        share->current_transfers = 0;
-        share->start_time = 0;
-        share->end_time = 0;
-        share->buff_full = 0;
-        share->readA = 0;
-        share->readB = 0;
 
-
+        //Rendez vous point between inputA and inputB.
         sem_post(&share->sem1);
         sem_wait(&share->sem2);
 
-
+        //Waits untill the input is given.
         sem_wait(&share->sem2);
         
 
@@ -169,10 +162,8 @@ void* inputB(void* data){
         //Waits until the threads, responsible for the print of the message unblock.
         sem_wait(&share->sem2);
 
-
     }
-        if(!share->running)
-            pthread_cancel(readfromB);
+    pthread_cancel(readfromB);
 
-        pthread_join(readfromB, NULL);
+    pthread_join(readfromB, NULL);
 }

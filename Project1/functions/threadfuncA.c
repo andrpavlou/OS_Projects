@@ -105,10 +105,11 @@ void* inputA(void* data){
         share->readB = 0;
         
 
+        //Rendez vous point between inputA and inputB.
         sem_wait(&share->sem1);
         sem_post(&share->sem2);
 
-        //Thread responsible to get the input of other process.
+        //Waits untill the input is given.
         sem_wait(&share->sem1);
 
 
@@ -174,7 +175,7 @@ void* inputA(void* data){
         //Waits until the threads, responsible for the print of the message unblock.
         sem_wait(&share->sem1);
     }
-        pthread_cancel(readfromA);
+    pthread_cancel(readfromA);
 
-        pthread_join(readfromA, NULL);
+    pthread_join(readfromA, NULL);
 }
