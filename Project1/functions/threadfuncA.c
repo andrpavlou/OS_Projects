@@ -10,7 +10,6 @@ void* fgets_tread(void* data){
 
         fgets((char*)outp, TEXT_SZ, stdin);
         strncpy(share->inp, outp, TEXT_SZ);
-        share->mes_sentA ++;
 
         share->readA = 1;
 
@@ -171,6 +170,8 @@ void* inputA(void* data){
                     share->current_transfers ++;
                 }
             }
+            if(!share->buff_full)
+                share->mes_sentA ++;
         }
         //Waits until the threads, responsible for the print of the message unblock.
         sem_wait(&share->sem1);

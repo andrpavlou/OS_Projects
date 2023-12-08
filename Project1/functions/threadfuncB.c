@@ -8,10 +8,8 @@ void* fgets_tread(void* data){
     while(share->running){
 
         fgets((char*)outp, TEXT_SZ, stdin);
-        strncpy(share->inp, outp, TEXT_SZ);
-        share->mes_sentB ++;    
+        strncpy(share->inp, outp, TEXT_SZ);   
 
-        // share->mes_sentB++;
         share->readB = 1;
 
 
@@ -107,7 +105,6 @@ void* inputB(void* data){
             //Checks if the next message will cause buffer overflow and does not accept it, if it is too long.
             if(strlen(share->read) + strlen(share->inp) > BUFF_SIZE - 2 * EXIT_PROGRAM_CHARS && strcmp(ex, share->inp) != 0){
                 share->buff_full = 1;
-                printf("\n\n exit");
                 printf("\n\n\nAFTER THIS MESSAGE BUFFER WILL FULL, TYPE %s OR TYPE A SMALLER MESSAGE.\n", EXIT_PROGRAM);
             }
 
@@ -158,6 +155,8 @@ void* inputB(void* data){
                     share->current_transfers ++;
                 }
             }
+            if(!share->buff_full)
+                share->mes_sentB ++;
         }
         //Waits until the threads, responsible for the print of the message unblock.
         sem_wait(&share->sem2);
