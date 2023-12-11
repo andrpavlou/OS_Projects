@@ -34,7 +34,6 @@ void* outputA(void* data){
     while(share->running){
         //Checks if the other process has registered an input.
             sem_wait(&share->sem5);
-            printf("flag5\n");
             //Wait for all the batches to arive, before printing the whole message.
             while(share->max_transfers > share->current_transfers && share->buff_full == 0){
                 if(share->current_transfers == 1){
@@ -104,7 +103,6 @@ void* inputA(void* data){
         share->readA = 0;
         share->readB = 0;
         
-        printf("flag\n");
         //Rendez vous point between inputA and inputB.
         sem_wait(&share->sem1);
         sem_post(&share->sem2);
