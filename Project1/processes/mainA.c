@@ -36,6 +36,8 @@ int main(){
     sem_init(&actions->sem1, 1, INITIAL_VALUE);
     sem_init(&actions->sem2, 1, INITIAL_VALUE);
     sem_init(&actions->sem3, 1, INITIAL_VALUE);
+    sem_init(&actions->sem4, 1, INITIAL_VALUE);
+    sem_init(&actions->sem5, 1, INITIAL_VALUE);
 
     pthread_t th_readPrint, th_output;
 
@@ -52,6 +54,9 @@ int main(){
     pthread_create(&th_readPrint, NULL, inputA, (void*)actions);
     pthread_create(&th_output, NULL, outputA, (void*)actions);
     pthread_join(th_readPrint, (void**)&th_ret);
+
+
+    pthread_cancel(th_output);
     pthread_join(th_output, (void**)&th_ret);
 
 
@@ -74,7 +79,7 @@ int main(){
     printf("MESSAGE RECEIVED:%d\n", actions->mes_receivedA);
     printf("MESSAGE SPLITS IN TOTAL:%d\n", actions->mes_splitsA);
     printf("MESSAGE SPLITS PER MESSAGE:%0.2f\n", splitspmsg);
-    printf("AVERAGE WAIT TIME FOR THE FIRST BATCH %0.2f MS\n", wait_time);
+    printf("AVERAGE WAIT TIME FOR THE FIRST BATCH %0.2f S\n", wait_time);
     printf("------------------------------------\n\n");
 
     if (shmdt(shared_memory) == -1) {

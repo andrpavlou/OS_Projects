@@ -42,6 +42,9 @@ int main(){
     pthread_create(&th_readPrint, NULL, inputB, (void*)actions);
     pthread_create(&th_output, NULL, outputB, (void*)actions);
     pthread_join(th_readPrint, (void**)&th_ret);
+
+
+    pthread_cancel(th_output);
     pthread_join(th_output, (void**)&th_ret);
 
     //In case of dividing with 0.
@@ -63,7 +66,7 @@ int main(){
     printf("MESSAGE RECEIVED:%d\n", actions->mes_receivedB);
     printf("MESSAGE SPLITS IN TOTAL:%d\n", actions->mes_splitsB);
     printf("MESSAGE SPLITS PER MESSAGE:%0.2f\n", splitspmsg);
-    printf("AVERAGE WAIT TIME FOR THE FIRST BATCH %0.2f MS\n", wait_time);
+    printf("AVERAGE WAIT TIME FOR THE FIRST BATCH %0.2f S\n", wait_time);
     printf("------------------------------------\n\n");
 
 

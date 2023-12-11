@@ -33,18 +33,19 @@ void* outputA(void* data){
     printf("---------- START CHATTING ----------\n");
     while(share->running){
         //Checks if the other process has registered an input.
-        if(share->readB){
+            sem_wait(&share->sem5);
+            printf("flag5\n");
             //Wait for all the batches to arive, before printing the whole message.
             while(share->max_transfers > share->current_transfers && share->buff_full == 0){
                 if(share->current_transfers == 1){
                     gettimeofday(&curr_time, NULL);
-                    share->end_time = curr_time.tv_usec;
+                    share->end_time = curr_time.tv_sec;
                 }
             }
 
-            if(share->end_time == 0 || share->max_transfers == 1){
+            if(share->end_time == 0){
                 gettimeofday(&curr_time, NULL);
-                share->end_time = curr_time.tv_usec;
+                share->end_time = curr_time.tv_sec;
             }
 
 
@@ -77,7 +78,7 @@ void* outputA(void* data){
             //Unblocks the input threads.
             sem_post(&share->sem1);
             sem_post(&share->sem2);
-        }
+        
     }
 }
 
@@ -103,7 +104,7 @@ void* inputA(void* data){
         share->readA = 0;
         share->readB = 0;
         
-
+        printf("flag\n");
         //Rendez vous point between inputA and inputB.
         sem_wait(&share->sem1);
         sem_post(&share->sem2);
@@ -114,7 +115,7 @@ void* inputA(void* data){
 
         //Splits the message into batches of 15 characters.
         if(share->readA){
-            
+            sem_post(&share->sem4);
             //Checks if the next message will cause buffer overflow and does not accept it, if it is too long.
             if(strlen(share->read) + strlen(share->inp) > BUFF_SIZE - 2 * EXIT_PROGRAM_CHARS  && strcmp(ex, share->inp) != 0){
                 share->buff_full = 1;
@@ -135,7 +136,7 @@ void* inputA(void* data){
                 share->current_transfers ++;
 
                 gettimeofday(&current_time, NULL);
-                share->start_time = current_time.tv_usec;
+                share->start_time = current_time.tv_sec;
             }
 
             //The message needs to be split.
@@ -159,7 +160,7 @@ void* inputA(void* data){
 
                     share->current_transfers ++;
                     gettimeofday(&current_time, NULL);
-                    share->start_time = current_time.tv_usec;
+                    share->start_time = current_time.tv_sec;
                 }
                 //Add the remaining none 15 characters the buffer.
                 if(rems >= 1){

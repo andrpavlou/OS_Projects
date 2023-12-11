@@ -33,17 +33,18 @@ void* outputB(void* data){
     printf("---------- START CHATTING ----------\n");
     while(share->running){
         //Checks if the other process has registered an input.
-        if(share->readA){
+            sem_wait(&share->sem4);
+
             //Wait for all the batches to arive before printing the whole message.
             while(share->max_transfers > share->current_transfers && share->buff_full == 0){
                 if(share->current_transfers == 1){
                     gettimeofday(&curr_time, NULL);
-                    share->end_time = curr_time.tv_usec;
+                    share->end_time = curr_time.tv_sec;
                 }
             }
-            if(share->end_time == 0 || share->max_transfers == 1){
+            if(share->end_time == 0){
                 gettimeofday(&curr_time, NULL);
-                share->end_time = curr_time.tv_usec;
+                share->end_time = curr_time.tv_sec;
             }
 
             int n = share->last_sentence;
@@ -75,7 +76,7 @@ void* outputB(void* data){
             //Unblocks the input threads.
             sem_post(&share->sem1);
             sem_post(&share->sem2);
-        }
+
     }
 }
 
@@ -101,7 +102,8 @@ void* inputB(void* data){
         sem_wait(&share->sem2);
         
 
-        if(share->readB){    
+        if(share->readB){   
+            sem_post(&share->sem5); 
             //Checks if the next message will cause buffer overflow and does not accept it, if it is too long.
             if(strlen(share->read) + strlen(share->inp) > BUFF_SIZE - 2 * EXIT_PROGRAM_CHARS && strcmp(ex, share->inp) != 0){
                 share->buff_full = 1;
@@ -120,7 +122,7 @@ void* inputB(void* data){
 
                 share->current_transfers ++;
                 gettimeofday(&current_time, NULL);
-                share->start_time = current_time.tv_usec;
+                share->start_time = current_time.tv_sec;
             }
 
             //The message needs to be split.
@@ -145,7 +147,7 @@ void* inputB(void* data){
 
                     share->current_transfers ++;
                     gettimeofday(&current_time, NULL);
-                    share->start_time = current_time.tv_usec;
+                    share->start_time = current_time.tv_sec;
                 }
                 //Add the remaining none 15 characters the buffer.
                 if(rems >= 1){

@@ -58,6 +58,8 @@ typedef struct Shared_actions{
     sem_t sem1;
     sem_t sem2;
     sem_t sem3;
+    sem_t sem4;
+    sem_t sem5;
 }Shared_actions;
 
 
