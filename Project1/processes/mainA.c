@@ -93,4 +93,6 @@ int main(){
     sem_destroy(&actions->sem1);
     sem_destroy(&actions->sem2);
     sem_destroy(&actions->sem3);
+    sem_destroy(&actions->sem4);
+    sem_destroy(&actions->sem5);
 }
