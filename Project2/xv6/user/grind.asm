@@ -154,7 +154,7 @@ go(int which_child)
     } else if(what == 8){
       read(fd, buf, sizeof(buf));
       fc:	00002a17          	auipc	s4,0x2
-     100:	f24a0a13          	addi	s4,s4,-220 # 2020 <buf.1239>
+     100:	f24a0a13          	addi	s4,s4,-220 # 2020 <buf.1238>
      104:	a825                	j	13c <go+0xc4>
       close(open("grindir/../a", O_CREATE|O_RDWR));
      106:	20200593          	li	a1,514

@@ -26,7 +26,7 @@ int uptime(void);
 
 //Added for priority
 int setpriority(int num);
-int getpinfo(struct pstat *, uint64); 
+int getpinfo(struct pstat *); 
 
 
 // ulib.c

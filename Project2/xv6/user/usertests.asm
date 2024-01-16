@@ -2105,9 +2105,9 @@ outofinodes(char *s)
   if(pid == 0){
     1422:	12051463          	bnez	a0,154a <copyinstr2+0x1b8>
     1426:	00008797          	auipc	a5,0x8
-    142a:	13a78793          	addi	a5,a5,314 # 9560 <big.1272>
+    142a:	13a78793          	addi	a5,a5,314 # 9560 <big.1271>
     142e:	00009697          	auipc	a3,0x9
-    1432:	13268693          	addi	a3,a3,306 # a560 <big.1272+0x1000>
+    1432:	13268693          	addi	a3,a3,306 # a560 <big.1271+0x1000>
       big[i] = 'x';
     1436:	07800713          	li	a4,120
     143a:	00e78023          	sb	a4,0(a5)
@@ -2116,7 +2116,7 @@ outofinodes(char *s)
     1440:	fed79de3          	bne	a5,a3,143a <copyinstr2+0xa8>
     big[PGSIZE] = '\0';
     1444:	00009797          	auipc	a5,0x9
-    1448:	10078e23          	sb	zero,284(a5) # a560 <big.1272+0x1000>
+    1448:	10078e23          	sb	zero,284(a5) # a560 <big.1271+0x1000>
     char *args2[] = { big, big, big, 0 };
     144c:	00007797          	auipc	a5,0x7
     1450:	10c78793          	addi	a5,a5,268 # 8558 <malloc+0x2542>
@@ -3682,9 +3682,9 @@ outofinodes(char *s)
     232c:	6145                	addi	sp,sp,48
     232e:	8082                	ret
     2330:	00007797          	auipc	a5,0x7
-    2334:	13078793          	addi	a5,a5,304 # 9460 <args.1820>
+    2334:	13078793          	addi	a5,a5,304 # 9460 <args.1819>
     2338:	00007697          	auipc	a3,0x7
-    233c:	22068693          	addi	a3,a3,544 # 9558 <args.1820+0xf8>
+    233c:	22068693          	addi	a3,a3,544 # 9558 <args.1819+0xf8>
       args[i] = "bigargs test: failed\n                                                                                                                                                                                                       ";
     2340:	00005717          	auipc	a4,0x5
     2344:	9b870713          	addi	a4,a4,-1608 # 6cf8 <malloc+0xce2>
@@ -3694,7 +3694,7 @@ outofinodes(char *s)
     234c:	fed79ee3          	bne	a5,a3,2348 <bigargtest+0x7c>
     args[MAXARG-1] = 0;
     2350:	00007597          	auipc	a1,0x7
-    2354:	11058593          	addi	a1,a1,272 # 9460 <args.1820>
+    2354:	11058593          	addi	a1,a1,272 # 9460 <args.1819>
     2358:	0e05bc23          	sd	zero,248(a1)
     exec("echo", args);
     235c:	00004517          	auipc	a0,0x4

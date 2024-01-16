@@ -1368,13 +1368,13 @@ nulterminate(struct cmd *cmd)
      a96:	37c080e7          	jalr	892(ra) # e0e <close>
   while(getcmd(buf, sizeof(buf)) >= 0){
      a9a:	00001497          	auipc	s1,0x1
-     a9e:	58648493          	addi	s1,s1,1414 # 2020 <buf.1140>
+     a9e:	58648493          	addi	s1,s1,1414 # 2020 <buf.1139>
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
      aa2:	06300913          	li	s2,99
      aa6:	02000993          	li	s3,32
       if(chdir(buf+3) < 0)
      aaa:	00001a17          	auipc	s4,0x1
-     aae:	579a0a13          	addi	s4,s4,1401 # 2023 <buf.1140+0x3>
+     aae:	579a0a13          	addi	s4,s4,1401 # 2023 <buf.1139+0x3>
         fprintf(2, "cannot cd %s\n", buf+3);
      ab2:	00001a97          	auipc	s5,0x1
      ab6:	95ea8a93          	addi	s5,s5,-1698 # 1410 <malloc+0x1e4>
@@ -1424,7 +1424,7 @@ nulterminate(struct cmd *cmd)
      b32:	bf79                	j	ad0 <main+0x6e>
       runcmd(parsecmd(buf));
      b34:	00001517          	auipc	a0,0x1
-     b38:	4ec50513          	addi	a0,a0,1260 # 2020 <buf.1140>
+     b38:	4ec50513          	addi	a0,a0,1260 # 2020 <buf.1139>
      b3c:	00000097          	auipc	ra,0x0
      b40:	e9e080e7          	jalr	-354(ra) # 9da <parsecmd>
      b44:	fffff097          	auipc	ra,0xfffff

@@ -10,6 +10,8 @@
 
 
 #define DEFAULT_PRIORITY 10
+#define H_PRIO 1
+#define L_PRIO 20
 
 struct cpu cpus[NCPU];
 
@@ -451,17 +453,28 @@ wait(uint64 addr)
 void
 scheduler(void)
 {
-  struct proc *p;
+  struct proc *p;  
   struct cpu *c = mycpu();
   
+  int highest_prio = L_PRIO + 1;
+
   c->proc = 0;
   for(;;){
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
 
-    for(p = proc; p < &proc[NPROC]; p++) {
+    for(p = proc; p < &proc[NPROC]; p++){
       acquire(&p->lock);
-      if(p->state == RUNNABLE) {
+      if(p->state == RUNNABLE && p->priority < highest_prio){
+        highest_prio = p->priority;
+      }
+      release(&p->lock);
+    }
+
+    for(p = proc; p < &proc[NPROC]; p++){
+      acquire(&p->lock);
+      if(p->state == RUNNABLE && p->priority <= highest_prio){
+        
         // Switch to chosen process.  It is the process's job
         // to release its lock and then reacquire it
         // before jumping back to us.
@@ -475,6 +488,7 @@ scheduler(void)
       }
       release(&p->lock);
     }
+    highest_prio = L_PRIO + 1;
   }
 }
 
@@ -698,8 +712,8 @@ int setpriority(int priority)
 
   acquire(&current_proc->lock);
 
-  //Priority given is not in the available bounds, or current process is not available.
-  if(priority < 1 || priority > 20 || !current_proc)
+  //Priority given is not in the available bounds, or current process is null.
+  if(priority < H_PRIO || priority > L_PRIO || !current_proc)
     return  -1;
 
   //Set priority = priority.
@@ -726,7 +740,7 @@ int getpinfo(struct pstat* stats){
       if(p->parent != 0)
         stats->ppid[index] = p->parent->pid;
       else  
-        stats->ppid[index] = -1;
+        stats->ppid[index] = 0;
 
       stats->pid[index] = p->pid;
       stats->priority[index] = p->priority;
