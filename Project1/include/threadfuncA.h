@@ -28,7 +28,6 @@
 #define INITIAL_VALUE 0
 
 
-
 typedef struct Shared_actions{
     int readA;
     int readB;

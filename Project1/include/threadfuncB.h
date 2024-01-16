@@ -27,6 +27,7 @@
 #define SEM_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
 #define INITIAL_VALUE 0
 
+
 typedef struct Shared_actions{
     int readA;
     int readB;

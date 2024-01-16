@@ -18,7 +18,6 @@ void* fgets_tread(void* data){
     }
 }
 
-
 void* outputA(void* data){
     struct Shared_actions* share;
     share = (struct Shared_actions*) data;

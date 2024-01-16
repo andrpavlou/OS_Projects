@@ -1,7 +1,6 @@
 #include "../include/threadfuncA.h"
 
 
-
 int main(){
     struct Shared_actions actions0;
     struct Shared_actions* actions ;
