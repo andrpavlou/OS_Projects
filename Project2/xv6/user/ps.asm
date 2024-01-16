@@ -20,9 +20,9 @@ int main(int argc, char *argv[]){
    c:	e852                	sd	s4,16(sp)
    e:	0080                	addi	s0,sp,64
   10:	81010113          	addi	sp,sp,-2032
-
-    struct pstat stats;
-    if(getpinfo((&stats)) != 0){
+    struct pstat pstats;
+    
+    if(getpinfo((&pstats)) != 0){
   14:	77fd                	lui	a5,0xfffff
   16:	7d078793          	addi	a5,a5,2000 # fffffffffffff7d0 <base+0xffffffffffffe7c0>
   1a:	00f40533          	add	a0,s0,a5
@@ -39,8 +39,8 @@ int main(int argc, char *argv[]){
     }
 
     for(uint64 i = 0; i < NPROC; i++){
-        if(stats.state[i] != UNUSED){
-            printf("NAME: %s \t   ID: %d \t   PARENT ID: %d \t   PRIORITY: %d   \tSTATE: %d   \n", stats.name[i], 
+        if(pstats.state[i] != UNUSED){
+            printf("NAME: %s \t   ID: %d \t   PARENT ID: %d \t   PRIORITY: %d   \tSTATE: %d   \n", 
   3e:	30098993          	addi	s3,s3,768
   42:	00001a17          	auipc	s4,0x1
   46:	80ea0a13          	addi	s4,s4,-2034 # 850 <malloc+0xf2>
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
   4c:	4501                	li	a0,0
   4e:	00000097          	auipc	ra,0x0
   52:	2ca080e7          	jalr	714(ra) # 318 <exit>
-            printf("NAME: %s \t   ID: %d \t   PARENT ID: %d \t   PRIORITY: %d   \tSTATE: %d   \n", stats.name[i], 
+            printf("NAME: %s \t   ID: %d \t   PARENT ID: %d \t   PRIORITY: %d   \tSTATE: %d   \n", 
   56:	00249593          	slli	a1,s1,0x2
   5a:	2004a703          	lw	a4,512(s1)
   5e:	1004a683          	lw	a3,256(s1)
@@ -61,11 +61,11 @@ int main(int argc, char *argv[]){
     for(uint64 i = 0; i < NPROC; i++){
   70:	0491                	addi	s1,s1,4
   72:	01248663          	beq	s1,s2,7e <main+0x7e>
-        if(stats.state[i] != UNUSED){
+        if(pstats.state[i] != UNUSED){
   76:	7004a783          	lw	a5,1792(s1)
   7a:	dbfd                	beqz	a5,70 <main+0x70>
   7c:	bfe9                	j	56 <main+0x56>
-            stats.pid[i], stats.ppid[i], stats.priority[i], stats.state[i]);
+            pstats.name[i], pstats.pid[i], pstats.ppid[i], pstats.priority[i], pstats.state[i]);
         }
     }
     exit(0);

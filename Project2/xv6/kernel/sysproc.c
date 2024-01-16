@@ -105,10 +105,11 @@ sys_setpriority(void)
 uint64
 sys_getpinfo(void)
 {
-  struct pstat stats;
+  struct pstat pstats;
 
-  if(argpstat (0 , &stats ,sizeof(struct pstat)) < 0)
+  //Checks if the current instantiation of the struct pstat is allowed.
+  if(argpstat (0 , &pstats ,sizeof(struct pstat)) < 0)
     return -1;
 
-  return getpinfo(&stats);
+  return getpinfo(&pstats);
 }

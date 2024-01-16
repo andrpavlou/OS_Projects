@@ -81,17 +81,18 @@ argstr(int n, char *buf, int max)
 }
 
 //////////////////////////////////////////////
+//Initializes struct pstat, and checks if there is enogh size for it.
 int
 argpstat(int n, struct pstat *pp, int size)
 {
-  int i;
   struct proc *curproc = myproc();
-  struct pstat p;
  
+  int i;
   argint(n, &i);
   if(size < 0 || (uint)i >= curproc->sz || (uint)i+size > curproc->sz)
     return -1;
 
+  struct pstat p;
   pp = (struct pstat*)&p;
   return 0;
 }

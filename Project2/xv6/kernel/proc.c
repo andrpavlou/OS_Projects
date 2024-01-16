@@ -62,8 +62,7 @@ procinit(void)
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
       p->state = UNUSED;
-      p->kstack = KSTACK((int) (p - proc));
-      p->priority = DEFAULT_PRIORITY;       // set p->priority to default priority given
+      p->kstack = KSTACK((int) (p - proc));    
   }
 }
 
@@ -123,6 +122,7 @@ allocproc(void)
   for(p = proc; p < &proc[NPROC]; p++) {
     acquire(&p->lock);
     if(p->state == UNUSED) {
+      p->priority = DEFAULT_PRIORITY; //Set p->priority to default priority given.
       goto found;
     } else {
       release(&p->lock);
@@ -463,6 +463,7 @@ scheduler(void)
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
 
+    //Finds the process with the highest priority and stores, its priority.
     for(p = proc; p < &proc[NPROC]; p++){
       acquire(&p->lock);
       if(p->state == RUNNABLE && p->priority < highest_prio){
@@ -471,9 +472,10 @@ scheduler(void)
       release(&p->lock);
     }
 
+    //Excectution of each runnuble process which its priority is equal as the highest priority found.
     for(p = proc; p < &proc[NPROC]; p++){
       acquire(&p->lock);
-      if(p->state == RUNNABLE && p->priority <= highest_prio){
+      if(p->state == RUNNABLE && p->priority == highest_prio){
         
         // Switch to chosen process.  It is the process's job
         // to release its lock and then reacquire it
@@ -705,7 +707,17 @@ procdump(void)
 
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+
+Functions for priority scheduler, and ps.
+
+
+*/
+
+
+//Function that sets the priority of current process, equal to priority.
 int setpriority(int priority)
 {
   struct proc* current_proc = myproc();
@@ -724,7 +736,9 @@ int setpriority(int priority)
   return 0;
 }
 
-int getpinfo(struct pstat* stats){
+//Retrieves useful information needed for ps
+//and stores them into struct pstat. 
+int getpinfo(struct pstat* pstats){
   struct proc* p;
 
   uint64 addr; 
@@ -738,22 +752,22 @@ int getpinfo(struct pstat* stats){
     if(p->state != UNUSED){
       //Edge case where parent does not exist.
       if(p->parent != 0)
-        stats->ppid[index] = p->parent->pid;
+        pstats->ppid[index] = p->parent->pid;
       else  
-        stats->ppid[index] = 0;
+        pstats->ppid[index] = 0; //Default value of parent id if it does not exist.
 
-      stats->pid[index] = p->pid;
-      stats->priority[index] = p->priority;
-      strncpy(stats->name[index], p->name, 16);
+      pstats->pid[index] = p->pid;
+      pstats->priority[index] = p->priority;
+      strncpy(pstats->name[index], p->name, 16);
     }
-    stats->state[index] = p->state;
+    pstats->state[index] = p->state;
     index++;
 
     release(&p->lock);
   }
   
-  //Copy struct pstat from kernel to user.
-  if(copyout(myproc()->pagetable, addr, (char *)stats, sizeof(struct pstat)) < 0)
+  //Copy struct pstat from kernel level to user level.
+  if(copyout(myproc()->pagetable, addr, (char *)pstats, sizeof(struct pstat)) < 0)
     return -1;
 
   return 0;

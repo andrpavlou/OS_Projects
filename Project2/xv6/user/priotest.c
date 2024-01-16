@@ -6,7 +6,6 @@
 #define SMALL_TIME 122212325
 
 // Comment out to use setpriority syscall
-
 // setpriority syscall in proc.c, default priority = 10, 
 //initialized in proc.c as well.
 // int setpriority(int num)
@@ -74,7 +73,7 @@ useless(int priority, uint64 time)
       printf("%d failed in fork!\n", getpid());
     else if(id == 0) {
       // Child
-      //sleep(1);
+      sleep(1);
       int pid = getpid();
       int priority = pid % 19 + 2; // Priority range: 2-20
       useless(priority, SMALL_TIME); // never returns
