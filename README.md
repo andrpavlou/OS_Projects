@@ -1,6 +1,6 @@
 # OS_Projects
 
 
-1) Chat between two processes.
+1) Communication between two processes.
 
-2) xv6 priority scheduler, ps implementation
+2) XV6 priority scheduler, ps and systems call implementation
